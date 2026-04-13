@@ -2,14 +2,14 @@ import Foundation
 
 /// An in-memory rate cache backed by a dictionary.
 public actor InMemoryRateCache: RateCache {
-    private var storage: [String: ConversionRate] = [:]
+    private var storage: [String: ConversionRateTable] = [:]
     private let ttl: TimeInterval
 
     public init(ttl: TimeInterval = 3600) {
         self.ttl = ttl
     }
 
-    public func conversionRate(for baseCurrencyCode: String) -> ConversionRate? {
+    public func conversionRate(for baseCurrencyCode: String) -> ConversionRateTable? {
         guard let entry = storage[baseCurrencyCode],
               Date().timeIntervalSince(entry.date) < ttl else {
             return nil
@@ -21,17 +21,17 @@ public actor InMemoryRateCache: RateCache {
         conversionRate(for: source.code)?.rate(for: target)
     }
 
-    public func store(_ rate: ConversionRate, for baseCurrencyCode: String) {
+    public func store(_ rateTable: ConversionRateTable, for baseCurrencyCode: String) {
         if let existing = storage[baseCurrencyCode] {
             var merged = existing.rates
-            for (key, value) in rate.rates {
+            for (key, value) in rateTable.rates {
                 merged[key] = value
             }
-            storage[baseCurrencyCode] = ConversionRate(
-                base: rate.base, rates: merged, date: rate.date
+            storage[baseCurrencyCode] = ConversionRateTable(
+                base: rateTable.base, rates: merged, date: rateTable.date
             )
         } else {
-            storage[baseCurrencyCode] = rate
+            storage[baseCurrencyCode] = rateTable
         }
     }
 

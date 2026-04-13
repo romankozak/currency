@@ -8,28 +8,28 @@ private struct MockProvider: ExchangeRateProvider {
     var rates: [String: Decimal]
     var failingBases: Set<String> = []
 
-    func fetchRates(for base: Currency) async throws -> ConversionRate {
+    func fetchRates(for base: Currency) async throws -> ConversionRateTable {
         if failingBases.contains(base.code) {
             throw ExchangeRateError.invalidResponse
         }
-        return ConversionRate(base: base, rates: rates)
+        return ConversionRateTable(base: base, rates: rates)
     }
 }
 
 private struct FailingProvider: ExchangeRateProvider {
-    func fetchRates(for base: Currency) async throws -> ConversionRate {
+    func fetchRates(for base: Currency) async throws -> ConversionRateTable {
         throw ExchangeRateError.invalidResponse
     }
 }
 
-/// A provider whose fetchRate always returns an empty ConversionRate (no rates for target).
+/// A provider whose fetchRate always returns an empty ConversionRateTable (no rates for target).
 private struct EmptyPairProvider: ExchangeRateProvider {
-    func fetchRates(for base: Currency) async throws -> ConversionRate {
-        ConversionRate(base: base, rates: [:])
+    func fetchRates(for base: Currency) async throws -> ConversionRateTable {
+        ConversionRateTable(base: base, rates: [:])
     }
 
-    func fetchRate(from base: Currency, to target: Currency) async throws -> ConversionRate {
-        ConversionRate(base: base, rates: [:])
+    func fetchRate(from base: Currency, to target: Currency) async throws -> ConversionRateTable {
+        ConversionRateTable(base: base, rates: [:])
     }
 }
 

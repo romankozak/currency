@@ -37,10 +37,10 @@ public actor CurrencyConverter {
             return r
         }
 
-        let pairRate = try await provider.fetchRate(from: source, to: target)
-        await rateCache.store(pairRate, for: source.code)
+        let rateTable = try await provider.fetchRate(from: source, to: target)
+        await rateCache.store(rateTable, for: source.code)
 
-        guard let r = pairRate.rate(for: target) else {
+        guard let r = rateTable.rate(for: target) else {
             throw ExchangeRateError.unsupportedCurrency(target.code)
         }
         return r
@@ -77,21 +77,21 @@ public actor CurrencyConverter {
         guard !currenciesToFetch.isEmpty else { return }
 
         let results = await withTaskGroup(
-            of: (Currency, Result<ConversionRate, Error>).self
+            of: (Currency, Result<ConversionRateTable, Error>).self
         ) { group in
             for currency in currenciesToFetch {
                 let provider = self.provider
                 group.addTask {
                     do {
-                        let rates = try await provider.fetchRates(for: currency)
-                        return (currency, .success(rates))
+                        let rateTable = try await provider.fetchRates(for: currency)
+                        return (currency, .success(rateTable))
                     } catch {
                         return (currency, .failure(error))
                     }
                 }
             }
 
-            var collected: [(Currency, Result<ConversionRate, Error>)] = []
+            var collected: [(Currency, Result<ConversionRateTable, Error>)] = []
             for await result in group {
                 collected.append(result)
             }
@@ -101,8 +101,8 @@ public actor CurrencyConverter {
         var failed: [Currency] = []
         for (currency, result) in results {
             switch result {
-            case .success(let rates):
-                await rateCache.store(rates, for: currency.code)
+            case .success(let rateTable):
+                await rateCache.store(rateTable, for: currency.code)
             case .failure:
                 failed.append(currency)
             }

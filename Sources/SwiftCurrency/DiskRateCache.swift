@@ -5,7 +5,7 @@ import Foundation
 /// Reads the full cache from disk on initialization and writes atomically
 /// on every store/clear operation.
 public actor DiskRateCache: RateCache {
-    private var storage: [String: ConversionRate]
+    private var storage: [String: ConversionRateTable]
     private let ttl: TimeInterval
     private let fileURL: URL
 
@@ -15,7 +15,7 @@ public actor DiskRateCache: RateCache {
         self.storage = Self.loadFromDisk(fileURL: fileURL)
     }
 
-    public func conversionRate(for baseCurrencyCode: String) -> ConversionRate? {
+    public func conversionRate(for baseCurrencyCode: String) -> ConversionRateTable? {
         guard let entry = storage[baseCurrencyCode],
               Date().timeIntervalSince(entry.date) < ttl else {
             return nil
@@ -27,17 +27,17 @@ public actor DiskRateCache: RateCache {
         conversionRate(for: source.code)?.rate(for: target)
     }
 
-    public func store(_ rate: ConversionRate, for baseCurrencyCode: String) {
+    public func store(_ rateTable: ConversionRateTable, for baseCurrencyCode: String) {
         if let existing = storage[baseCurrencyCode] {
             var merged = existing.rates
-            for (key, value) in rate.rates {
+            for (key, value) in rateTable.rates {
                 merged[key] = value
             }
-            storage[baseCurrencyCode] = ConversionRate(
-                base: rate.base, rates: merged, date: rate.date
+            storage[baseCurrencyCode] = ConversionRateTable(
+                base: rateTable.base, rates: merged, date: rateTable.date
             )
         } else {
-            storage[baseCurrencyCode] = rate
+            storage[baseCurrencyCode] = rateTable
         }
         writeToDisk()
     }
@@ -60,10 +60,10 @@ public actor DiskRateCache: RateCache {
         try? data.write(to: fileURL, options: .atomic)
     }
 
-    private static func loadFromDisk(fileURL: URL) -> [String: ConversionRate] {
+    private static func loadFromDisk(fileURL: URL) -> [String: ConversionRateTable] {
         guard let data = try? Data(contentsOf: fileURL) else { return [:] }
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601
-        return (try? decoder.decode([String: ConversionRate].self, from: data)) ?? [:]
+        return (try? decoder.decode([String: ConversionRateTable].self, from: data)) ?? [:]
     }
 }

@@ -119,47 +119,47 @@ import Testing
     #expect(Currency.try.symbol == "₺")
 }
 
-// MARK: - ConversionRate
+// MARK: - ConversionRateTable
 
 @Test func conversionRateSelf() {
-    let rate = ConversionRate(base: .usd, rates: ["EUR": Decimal(string: "0.92")!, "GBP": Decimal(string: "0.79")!])
-    #expect(rate.rate(for: .usd) == 1)
+    let rateTable = ConversionRateTable(base: .usd, rates: ["EUR": Decimal(string: "0.92")!, "GBP": Decimal(string: "0.79")!])
+    #expect(rateTable.rate(for: .usd) == 1)
 }
 
 @Test func conversionRateForCurrency() {
-    let rate = ConversionRate(base: .usd, rates: ["EUR": Decimal(string: "0.92")!, "GBP": Decimal(string: "0.79")!])
-    #expect(rate.rate(for: .eur) == Decimal(string: "0.92")!)
-    #expect(rate.rate(for: .gbp) == Decimal(string: "0.79")!)
+    let rateTable = ConversionRateTable(base: .usd, rates: ["EUR": Decimal(string: "0.92")!, "GBP": Decimal(string: "0.79")!])
+    #expect(rateTable.rate(for: .eur) == Decimal(string: "0.92")!)
+    #expect(rateTable.rate(for: .gbp) == Decimal(string: "0.79")!)
 }
 
 @Test func conversionRateConvert() {
-    let rate = ConversionRate(base: .usd, rates: ["EUR": Decimal(string: "0.92")!])
-    let result = rate.convert(100, to: .eur)
+    let rateTable = ConversionRateTable(base: .usd, rates: ["EUR": Decimal(string: "0.92")!])
+    let result = rateTable.convert(100, to: .eur)
     #expect(result != nil)
     #expect(result! == 92)
 }
 
 @Test func conversionRateConvertZero() {
-    let rate = ConversionRate(base: .usd, rates: ["EUR": Decimal(string: "0.92")!])
-    #expect(rate.convert(0, to: .eur) == 0)
+    let rateTable = ConversionRateTable(base: .usd, rates: ["EUR": Decimal(string: "0.92")!])
+    #expect(rateTable.convert(0, to: .eur) == 0)
 }
 
 @Test func conversionRateConvertLargeAmount() {
-    let rate = ConversionRate(base: .usd, rates: ["JPY": Decimal(string: "149.50")!])
-    let result = rate.convert(1_000_000, to: .jpy)!
+    let rateTable = ConversionRateTable(base: .usd, rates: ["JPY": Decimal(string: "149.50")!])
+    let result = rateTable.convert(1_000_000, to: .jpy)!
     #expect(result == 149_500_000)
 }
 
 @Test func conversionRateMissing() {
-    let rate = ConversionRate(base: .usd, rates: [:])
-    #expect(rate.rate(for: .eur) == nil)
-    #expect(rate.convert(100, to: .eur) == nil)
+    let rateTable = ConversionRateTable(base: .usd, rates: [:])
+    #expect(rateTable.rate(for: .eur) == nil)
+    #expect(rateTable.convert(100, to: .eur) == nil)
 }
 
 @Test func conversionRateStoresDate() {
     let fixedDate = Date(timeIntervalSince1970: 1_000_000)
-    let rate = ConversionRate(base: .usd, rates: [:], date: fixedDate)
-    #expect(rate.date == fixedDate)
+    let rateTable = ConversionRateTable(base: .usd, rates: [:], date: fixedDate)
+    #expect(rateTable.date == fixedDate)
 }
 
 // MARK: - LocalExchangeRateProvider
