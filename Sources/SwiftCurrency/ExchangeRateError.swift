@@ -6,6 +6,7 @@ public enum ExchangeRateError: Error, LocalizedError {
     case networkError(underlying: Error)
     case invalidResponse
     case decodingError(underlying: Error)
+    case refreshFailed(currencies: [Currency])
 
     public var errorDescription: String? {
         switch self {
@@ -17,6 +18,8 @@ public enum ExchangeRateError: Error, LocalizedError {
             "Invalid response from exchange rate API"
         case .decodingError(let error):
             "Failed to decode response: \(error.localizedDescription)"
+        case .refreshFailed(let currencies):
+            "Failed to refresh rates for: \(currencies.map(\.code).joined(separator: ", "))"
         }
     }
 }
