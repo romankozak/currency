@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 56;
+	objectVersion = 55;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -20,6 +20,7 @@
 		C7C68FC7ADB91D580A793C4D /* ExchangeRateProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB67650CBD6450B12FB5BA1F /* ExchangeRateProvider.swift */; };
 		D676F301D870FBED4BD9E5EE /* SwiftCurrencyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA45A6CFE5B3820ADBDA8ABE /* SwiftCurrencyTests.swift */; };
 		EC647B68C757BEA3281715A0 /* SwiftCurrency.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 61A9843104044997DA9929A3 /* SwiftCurrency.framework */; };
+		FD1FAE9D0C27FFC8A6D5ED02 /* CurrencyConverterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2A29E95D8D139C0E117DAEB /* CurrencyConverterTests.swift */; };
 		FD45B346A2039B0274165740 /* ConversionRate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78A65346E8F0C0D236ADF428 /* ConversionRate.swift */; };
 /* End PBXBuildFile section */
 
@@ -113,6 +114,7 @@
 		B1DFD1FDD2934FD70452A40A /* CurrencyConverter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrencyConverter.swift; sourceTree = "<group>"; };
 		CE6C926E0F73A57868603DCF /* SwiftCurrencyFrankfurter-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "SwiftCurrencyFrankfurter-Info.plist"; sourceTree = "<group>"; };
 		DB67650CBD6450B12FB5BA1F /* ExchangeRateProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExchangeRateProvider.swift; sourceTree = "<group>"; };
+		E2A29E95D8D139C0E117DAEB /* CurrencyConverterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrencyConverterTests.swift; sourceTree = "<group>"; };
 		E475E98946B8607DB1D36CB6 /* Currency+All.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Currency+All.swift"; sourceTree = "<group>"; };
 		E92933A758D36CB2B5FB3D35 /* LocalExchangeRateProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalExchangeRateProvider.swift; sourceTree = "<group>"; };
 		FA45A6CFE5B3820ADBDA8ABE /* SwiftCurrencyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftCurrencyTests.swift; sourceTree = "<group>"; };
@@ -200,6 +202,7 @@
 		95CD3332D782E77E878F325B /* SwiftCurrencyTests */ = {
 			isa = PBXGroup;
 			children = (
+				E2A29E95D8D139C0E117DAEB /* CurrencyConverterTests.swift */,
 				FA45A6CFE5B3820ADBDA8ABE /* SwiftCurrencyTests.swift */,
 			);
 			path = SwiftCurrencyTests;
@@ -352,6 +355,8 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
+				TargetAttributes = {
+				};
 			};
 			buildConfigurationList = B4919607B0E33F6D6502FD95 /* Build configuration list for PBXProject "SwiftCurrency" */;
 			compatibilityVersion = "Xcode 14.0";
@@ -440,6 +445,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FD1FAE9D0C27FFC8A6D5ED02 /* CurrencyConverterTests.swift in Sources */,
 				D676F301D870FBED4BD9E5EE /* SwiftCurrencyTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -634,7 +640,10 @@
 				SUPPORTS_MACCATALYST = NO;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) DEBUG";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = (
+					"$(inherited)",
+					DEBUG,
+				);
 				SWIFT_COMPILATION_MODE = singlefile;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
@@ -793,7 +802,10 @@
 				SUPPORTS_MACCATALYST = NO;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) DEBUG";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = (
+					"$(inherited)",
+					DEBUG,
+				);
 				SWIFT_COMPILATION_MODE = singlefile;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
@@ -831,7 +843,10 @@
 				SUPPORTS_MACCATALYST = NO;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) DEBUG";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = (
+					"$(inherited)",
+					DEBUG,
+				);
 				SWIFT_COMPILATION_MODE = singlefile;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
@@ -866,7 +881,10 @@
 				SUPPORTS_MACCATALYST = NO;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) DEBUG";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = (
+					"$(inherited)",
+					DEBUG,
+				);
 				SWIFT_COMPILATION_MODE = singlefile;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
