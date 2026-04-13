@@ -25,7 +25,7 @@ public struct FrankfurterExchangeRateProvider: ExchangeRateProvider {
 
     public func fetchRate(from base: Currency, to target: Currency) async throws -> ConversionRate {
         if base == target {
-            return ConversionRate(base: base, rates: [target.code: 1.0])
+            return ConversionRate(base: base, rates: [target.code: 1])
         }
 
         var components = URLComponents(url: baseURL.appendingPathComponent("latest"), resolvingAgainstBaseURL: false)!
@@ -37,7 +37,7 @@ public struct FrankfurterExchangeRateProvider: ExchangeRateProvider {
         let decoded = try await fetch(url: components.url!)
 
         var rates = decoded.rates
-        rates[base.code] = 1.0
+        rates[base.code] = 1
 
         return ConversionRate(base: base, rates: rates, date: parseDate(decoded.date))
     }
@@ -49,7 +49,7 @@ public struct FrankfurterExchangeRateProvider: ExchangeRateProvider {
         let decoded = try await fetch(url: components.url!)
 
         var rates = decoded.rates
-        rates[base.code] = 1.0
+        rates[base.code] = 1
 
         return ConversionRate(base: base, rates: rates, date: parseDate(decoded.date))
     }
@@ -85,5 +85,5 @@ public struct FrankfurterExchangeRateProvider: ExchangeRateProvider {
 private struct FrankfurterResponse: Decodable {
     let base: String
     let date: String
-    let rates: [String: Double]
+    let rates: [String: Decimal]
 }

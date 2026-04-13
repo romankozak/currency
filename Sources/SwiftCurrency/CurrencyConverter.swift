@@ -24,7 +24,7 @@ public actor CurrencyConverter {
     /// Returns the exchange rate from one currency to another.
     ///
     /// Uses the provider's single-pair endpoint when available, falling back to cached full rates.
-    public func rate(from source: Currency, to target: Currency) async throws -> Double {
+    public func rate(from source: Currency, to target: Currency) async throws -> Decimal {
         // Check cache first
         if let cached = cache[source.code], Date().timeIntervalSince(cached.date) < cacheDuration,
            let r = cached.rate(for: target) {
@@ -39,7 +39,7 @@ public actor CurrencyConverter {
     }
 
     /// Converts an amount from one currency to another.
-    public func convert(_ amount: Double, from source: Currency, to target: Currency) async throws -> Double {
+    public func convert(_ amount: Decimal, from source: Currency, to target: Currency) async throws -> Decimal {
         let r = try await rate(from: source, to: target)
         return amount * r
     }

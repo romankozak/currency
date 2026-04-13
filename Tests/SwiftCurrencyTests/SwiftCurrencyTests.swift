@@ -122,32 +122,32 @@ import Testing
 // MARK: - ConversionRate
 
 @Test func conversionRateSelf() {
-    let rate = ConversionRate(base: .usd, rates: ["EUR": 0.92, "GBP": 0.79])
-    #expect(rate.rate(for: .usd) == 1.0)
+    let rate = ConversionRate(base: .usd, rates: ["EUR": Decimal(string: "0.92")!, "GBP": Decimal(string: "0.79")!])
+    #expect(rate.rate(for: .usd) == 1)
 }
 
 @Test func conversionRateForCurrency() {
-    let rate = ConversionRate(base: .usd, rates: ["EUR": 0.92, "GBP": 0.79])
-    #expect(rate.rate(for: .eur) == 0.92)
-    #expect(rate.rate(for: .gbp) == 0.79)
+    let rate = ConversionRate(base: .usd, rates: ["EUR": Decimal(string: "0.92")!, "GBP": Decimal(string: "0.79")!])
+    #expect(rate.rate(for: .eur) == Decimal(string: "0.92")!)
+    #expect(rate.rate(for: .gbp) == Decimal(string: "0.79")!)
 }
 
 @Test func conversionRateConvert() {
-    let rate = ConversionRate(base: .usd, rates: ["EUR": 0.92])
+    let rate = ConversionRate(base: .usd, rates: ["EUR": Decimal(string: "0.92")!])
     let result = rate.convert(100, to: .eur)
     #expect(result != nil)
-    #expect(abs(result! - 92.0) < 0.001)
+    #expect(result! == 92)
 }
 
 @Test func conversionRateConvertZero() {
-    let rate = ConversionRate(base: .usd, rates: ["EUR": 0.92])
-    #expect(rate.convert(0, to: .eur) == 0.0)
+    let rate = ConversionRate(base: .usd, rates: ["EUR": Decimal(string: "0.92")!])
+    #expect(rate.convert(0, to: .eur) == 0)
 }
 
 @Test func conversionRateConvertLargeAmount() {
-    let rate = ConversionRate(base: .usd, rates: ["JPY": 149.50])
+    let rate = ConversionRate(base: .usd, rates: ["JPY": Decimal(string: "149.50")!])
     let result = rate.convert(1_000_000, to: .jpy)!
-    #expect(abs(result - 149_500_000.0) < 0.001)
+    #expect(result == 149_500_000)
 }
 
 @Test func conversionRateMissing() {
@@ -168,7 +168,7 @@ import Testing
     let provider = LocalExchangeRateProvider()
     let rates = try await provider.fetchRates(for: .usd)
     #expect(rates.base == .usd)
-    #expect(rates.rate(for: .usd) == 1.0)
+    #expect(rates.rate(for: .usd) == 1)
     #expect(rates.rate(for: .eur) != nil)
 }
 
@@ -176,18 +176,20 @@ import Testing
     let provider = LocalExchangeRateProvider()
     let rates = try await provider.fetchRates(for: .eur)
     #expect(rates.base == .eur)
-    #expect(abs(rates.rate(for: .eur)! - 1.0) < 0.001)
+    let eurRate = rates.rate(for: .eur)!
+    #expect(abs(eurRate - 1) < Decimal(string: "0.001")!)
     let eurToUsd = rates.rate(for: .usd)!
-    #expect(eurToUsd > 1.0 && eurToUsd < 1.2)
+    #expect(eurToUsd > 1 && eurToUsd < Decimal(string: "1.2")!)
 }
 
 @Test func localProviderJPY() async throws {
     let provider = LocalExchangeRateProvider()
     let rates = try await provider.fetchRates(for: .jpy)
     #expect(rates.base == .jpy)
-    #expect(abs(rates.rate(for: .jpy)! - 1.0) < 0.001)
+    let jpyRate = rates.rate(for: .jpy)!
+    #expect(abs(jpyRate - 1) < Decimal(string: "0.001")!)
     let jpyToUsd = rates.rate(for: .usd)!
-    #expect(jpyToUsd > 0.005 && jpyToUsd < 0.01)
+    #expect(jpyToUsd > Decimal(string: "0.005")! && jpyToUsd < Decimal(string: "0.01")!)
 }
 
 @Test func localProviderCrossRateConsistency() async throws {
@@ -197,7 +199,7 @@ import Testing
 
     let usdToEur = usdRates.rate(for: .eur)!
     let eurToUsd = eurRates.rate(for: .usd)!
-    #expect(abs(usdToEur * eurToUsd - 1.0) < 0.001)
+    #expect(abs(usdToEur * eurToUsd - 1) < Decimal(string: "0.001")!)
 }
 
 @Test func localProviderAllStubbedCurrenciesReturned() async throws {
@@ -229,7 +231,7 @@ import Testing
 // MARK: - Mock provider for CurrencyConverter tests
 
 private struct MockProvider: ExchangeRateProvider {
-    var rates: [String: Double]
+    var rates: [String: Decimal]
 
     func fetchRates(for base: Currency) async throws -> ConversionRate {
         ConversionRate(base: base, rates: rates)
@@ -247,7 +249,7 @@ private struct FailingProvider: ExchangeRateProvider {
 @Test func converterLocalRates() async throws {
     let converter = CurrencyConverter()
     let rate = try await converter.rate(from: .usd, to: .eur)
-    #expect(rate > 0.8 && rate < 1.0)
+    #expect(rate > Decimal(string: "0.8")! && rate < 1)
 }
 
 @Test func converterConvert() async throws {
@@ -259,28 +261,28 @@ private struct FailingProvider: ExchangeRateProvider {
 @Test func converterSameCurrency() async throws {
     let converter = CurrencyConverter()
     let rate = try await converter.rate(from: .usd, to: .usd)
-    #expect(rate == 1.0)
-    let amount = try await converter.convert(42.5, from: .eur, to: .eur)
-    #expect(abs(amount - 42.5) < 0.001)
+    #expect(rate == 1)
+    let amount: Decimal = try await converter.convert(Decimal(string: "42.5")!, from: .eur, to: .eur)
+    #expect(abs(amount - Decimal(string: "42.5")!) < Decimal(string: "0.001")!)
 }
 
 @Test func converterConvertZero() async throws {
     let converter = CurrencyConverter()
     let amount = try await converter.convert(0, from: .usd, to: .jpy)
-    #expect(amount == 0.0)
+    #expect(amount == 0)
 }
 
 @Test func converterWithCustomProvider() async throws {
-    let mock = MockProvider(rates: ["EUR": 2.0, "GBP": 3.0])
+    let mock = MockProvider(rates: ["EUR": 2, "GBP": 3])
     let converter = CurrencyConverter(provider: mock)
     let rate = try await converter.rate(from: .usd, to: .eur)
-    #expect(rate == 2.0)
+    #expect(rate == 2)
     let amount = try await converter.convert(10, from: .usd, to: .gbp)
-    #expect(amount == 30.0)
+    #expect(amount == 30)
 }
 
 @Test func converterThrowsForUnsupportedTarget() async {
-    let mock = MockProvider(rates: ["EUR": 0.92])
+    let mock = MockProvider(rates: ["EUR": Decimal(string: "0.92")!])
     let converter = CurrencyConverter(provider: mock)
     do {
         _ = try await converter.rate(from: .usd, to: .jpy)
@@ -315,7 +317,7 @@ private struct FailingProvider: ExchangeRateProvider {
 }
 
 @Test func converterCaching() async throws {
-    let mock = MockProvider(rates: ["EUR": 0.92])
+    let mock = MockProvider(rates: ["EUR": Decimal(string: "0.92")!])
     let converter = CurrencyConverter(provider: mock, cacheDuration: 3600)
     let rate1 = try await converter.rate(from: .usd, to: .eur)
     let rate2 = try await converter.rate(from: .usd, to: .eur)
@@ -323,21 +325,21 @@ private struct FailingProvider: ExchangeRateProvider {
 }
 
 @Test func converterClearCache() async throws {
-    let mock = MockProvider(rates: ["EUR": 0.92])
+    let mock = MockProvider(rates: ["EUR": Decimal(string: "0.92")!])
     let converter = CurrencyConverter(provider: mock, cacheDuration: 3600)
     _ = try await converter.rate(from: .usd, to: .eur)
     await converter.clearCache()
     let rate = try await converter.rate(from: .usd, to: .eur)
-    #expect(rate == 0.92)
+    #expect(rate == Decimal(string: "0.92")!)
 }
 
 @Test func converterExpiredCacheRefetches() async throws {
-    let mock = MockProvider(rates: ["EUR": 0.92])
+    let mock = MockProvider(rates: ["EUR": Decimal(string: "0.92")!])
     let converter = CurrencyConverter(provider: mock, cacheDuration: 0)
     let rate1 = try await converter.rate(from: .usd, to: .eur)
     let rate2 = try await converter.rate(from: .usd, to: .eur)
     #expect(rate1 == rate2)
-    #expect(rate1 == 0.92)
+    #expect(rate1 == Decimal(string: "0.92")!)
 }
 
 // MARK: - ExchangeRateError
@@ -370,7 +372,7 @@ private struct FailingProvider: ExchangeRateProvider {
     let eurRates = try await provider.fetchRates(for: .eur)
     let backToUsd = eurRates.convert(euros, to: .usd)!
 
-    #expect(abs(backToUsd - 100.0) < 0.01)
+    #expect(abs(backToUsd - 100) < Decimal(string: "0.01")!)
 }
 
 // MARK: - fetchRate(from:to:) single-pair
@@ -387,7 +389,7 @@ private struct FailingProvider: ExchangeRateProvider {
 @Test func localProviderFetchRateSameCurrency() async throws {
     let provider = LocalExchangeRateProvider()
     let result = try await provider.fetchRate(from: .usd, to: .usd)
-    #expect(result.rate(for: .usd) == 1.0)
+    #expect(result.rate(for: .usd) == 1)
 }
 
 @Test func localProviderFetchRateConsistentWithFull() async throws {
@@ -434,8 +436,8 @@ private struct FailingProvider: ExchangeRateProvider {
 }
 
 @Test func converterUsesSinglePairMethod() async throws {
-    let mock = MockProvider(rates: ["EUR": 2.0, "GBP": 3.0])
+    let mock = MockProvider(rates: ["EUR": 2, "GBP": 3])
     let converter = CurrencyConverter(provider: mock)
     let rate = try await converter.rate(from: .usd, to: .eur)
-    #expect(rate == 2.0)
+    #expect(rate == 2)
 }
