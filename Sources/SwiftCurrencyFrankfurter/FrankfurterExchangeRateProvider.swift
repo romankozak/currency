@@ -23,11 +23,38 @@ public struct FrankfurterExchangeRateProvider: ExchangeRateProvider {
         self.baseURL = baseURL
     }
 
+    public func fetchRate(from base: Currency, to target: Currency) async throws -> ConversionRate {
+        if base == target {
+            return ConversionRate(base: base, rates: [target.code: 1.0])
+        }
+
+        var components = URLComponents(url: baseURL.appendingPathComponent("latest"), resolvingAgainstBaseURL: false)!
+        components.queryItems = [
+            URLQueryItem(name: "from", value: base.code),
+            URLQueryItem(name: "to", value: target.code),
+        ]
+
+        let decoded = try await fetch(url: components.url!)
+
+        var rates = decoded.rates
+        rates[base.code] = 1.0
+
+        return ConversionRate(base: base, rates: rates, date: parseDate(decoded.date))
+    }
+
     public func fetchRates(for base: Currency) async throws -> ConversionRate {
         var components = URLComponents(url: baseURL.appendingPathComponent("latest"), resolvingAgainstBaseURL: false)!
         components.queryItems = [URLQueryItem(name: "from", value: base.code)]
-        let url = components.url!
 
+        let decoded = try await fetch(url: components.url!)
+
+        var rates = decoded.rates
+        rates[base.code] = 1.0
+
+        return ConversionRate(base: base, rates: rates, date: parseDate(decoded.date))
+    }
+
+    private func fetch(url: URL) async throws -> FrankfurterResponse {
         let data: Data
         let response: URLResponse
         do {
@@ -40,22 +67,18 @@ public struct FrankfurterExchangeRateProvider: ExchangeRateProvider {
             throw ExchangeRateError.invalidResponse
         }
 
-        let decoded: FrankfurterResponse
         do {
-            decoded = try JSONDecoder().decode(FrankfurterResponse.self, from: data)
+            return try JSONDecoder().decode(FrankfurterResponse.self, from: data)
         } catch {
             throw ExchangeRateError.decodingError(underlying: error)
         }
+    }
 
-        var rates = decoded.rates
-        rates[base.code] = 1.0
-
+    private func parseDate(_ string: String) -> Date {
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyy-MM-dd"
         dateFormatter.timeZone = TimeZone(identifier: "UTC")
-        let date = dateFormatter.date(from: decoded.date) ?? Date()
-
-        return ConversionRate(base: base, rates: rates, date: date)
+        return dateFormatter.date(from: string) ?? Date()
     }
 }
 
