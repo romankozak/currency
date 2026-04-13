@@ -248,6 +248,17 @@ private struct FailingProvider: ExchangeRateProvider {
     }
 }
 
+/// A provider whose fetchRate always returns an empty ConversionRate (no rates for target).
+private struct EmptyPairProvider: ExchangeRateProvider {
+    func fetchRates(for base: Currency) async throws -> ConversionRate {
+        ConversionRate(base: base, rates: [:])
+    }
+
+    func fetchRate(from base: Currency, to target: Currency) async throws -> ConversionRate {
+        ConversionRate(base: base, rates: [:])
+    }
+}
+
 // MARK: - CurrencyConverter
 
 @Test func converterLocalRates() async throws {
@@ -518,4 +529,21 @@ private struct FailingProvider: ExchangeRateProvider {
     let error = ExchangeRateError.refreshFailed(currencies: [.usd, .eur])
     #expect(error.errorDescription?.contains("USD") == true)
     #expect(error.errorDescription?.contains("EUR") == true)
+}
+
+@Test func converterThrowsWhenFetchRateReturnsMissingTarget() async {
+    let converter = CurrencyConverter(provider: EmptyPairProvider())
+    do {
+        _ = try await converter.rate(from: .usd, to: .eur)
+        #expect(Bool(false), "Should have thrown")
+    } catch let error as ExchangeRateError {
+        switch error {
+        case .unsupportedCurrency(let code):
+            #expect(code == "EUR")
+        default:
+            #expect(Bool(false), "Wrong error case: \(error)")
+        }
+    } catch {
+        #expect(Bool(false), "Wrong error type: \(error)")
+    }
 }
