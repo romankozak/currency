@@ -1,7 +1,6 @@
 import Foundation
 import Testing
 @testable import SwiftCurrency
-@testable import SwiftCurrencyFrankfurter
 
 // MARK: - FrankfurterExchangeRateProvider unit tests (no network)
 

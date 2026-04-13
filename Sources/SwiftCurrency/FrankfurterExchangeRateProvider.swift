@@ -1,5 +1,4 @@
 import Foundation
-import SwiftCurrency
 
 /// An exchange rate provider that fetches live rates from the free
 /// [Frankfurter API](https://www.frankfurter.app), powered by the European Central Bank.
@@ -8,7 +7,6 @@ import SwiftCurrency
 ///
 /// ```swift
 /// import SwiftCurrency
-/// import SwiftCurrencyFrankfurter
 ///
 /// let provider = FrankfurterExchangeRateProvider()
 /// let rates = try await provider.fetchRates(for: .usd)
