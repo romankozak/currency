@@ -144,14 +144,14 @@
 		57FDAD0B7D666E7125DBAF4A /* SwiftCurrencyTests */ = {
 			isa = PBXGroup;
 			children = (
-				A1B2C3D4E5F60002AABB0001 /* CurrencyTests.swift */,
-				A1B2C3D4E5F60002AABB0002 /* ConversionRateTableTests.swift */,
+				DB8E902C9D7251D0A1324EC8 /* CurrencyConverterTests.swift */,
 				A1B2C3D4E5F60002AABB0003 /* LocalExchangeRateProviderTests.swift */,
-				A1B2C3D4E5F60002AABB0004 /* ExchangeRateErrorTests.swift */,
 				A1B2C3D4E5F60002AABB0005 /* InMemoryRateCacheTests.swift */,
 				A1B2C3D4E5F60002AABB0006 /* LocalFileRateCacheTests.swift */,
-				DB8E902C9D7251D0A1324EC8 /* CurrencyConverterTests.swift */,
 				C56FB5AEC6192DD22839F91F /* FrankfurterProviderTests.swift */,
+				A1B2C3D4E5F60002AABB0001 /* CurrencyTests.swift */,
+				A1B2C3D4E5F60002AABB0002 /* ConversionRateTableTests.swift */,
+				A1B2C3D4E5F60002AABB0004 /* ExchangeRateErrorTests.swift */,
 			);
 			name = SwiftCurrencyTests;
 			path = Tests/SwiftCurrencyTests;

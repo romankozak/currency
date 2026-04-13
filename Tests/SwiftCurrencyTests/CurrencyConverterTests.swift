@@ -225,7 +225,7 @@ private struct EmptyPairProvider: ExchangeRateProviding {
 
 // MARK: - CurrencyConverter with injected cache
 
-@Test func converterWithDiskCache() async throws {
+@Test func converterWithLocalFileCache() async throws {
     let url = FileManager.default.temporaryDirectory.appendingPathComponent("test_\(UUID()).json")
     defer { try? FileManager.default.removeItem(at: url) }
 
@@ -237,4 +237,138 @@ private struct EmptyPairProvider: ExchangeRateProviding {
     // Verify it was persisted
     let cache2 = LocalFileRateCache(fileURL: url, ttl: 3600)
     #expect(await cache2.rate(from: .usd, to: .eur) != nil)
+}
+
+// MARK: - Cache vs provider isolation
+
+@Test func converterReturnsCachedRateWhenValid() async throws {
+    // Seed cache with EUR = 0.50 (a clearly fake rate)
+    let cache = InMemoryRateCache(ttl: 3600)
+    await cache.store(
+        ConversionRateTable(base: .usd, rates: ["EUR": Decimal(string: "0.50")!]),
+        for: "USD"
+    )
+    // Provider returns a different rate (EUR = 0.92)
+    let provider = MockProvider(rates: ["EUR": Decimal(string: "0.92")!])
+    let converter = CurrencyConverter(provider: provider, cache: cache)
+
+    let rate = try await converter.rate(from: .usd, to: .eur)
+    // Must get the cached value, not the provider value
+    #expect(rate == Decimal(string: "0.50")!)
+}
+
+@Test func converterSkipsExpiredCacheAndFetchesFromProvider() async throws {
+    // Seed cache with a rate that will expire immediately (TTL = 0)
+    let cache = InMemoryRateCache(ttl: 0)
+    await cache.store(
+        ConversionRateTable(base: .usd, rates: ["EUR": Decimal(string: "0.50")!]),
+        for: "USD"
+    )
+    // Provider returns a different rate
+    let provider = MockProvider(rates: ["EUR": Decimal(string: "0.92")!])
+    let converter = CurrencyConverter(provider: provider, cache: cache)
+
+    let rate = try await converter.rate(from: .usd, to: .eur)
+    // Expired cache should be skipped → provider value returned
+    #expect(rate == Decimal(string: "0.92")!)
+}
+
+@Test func converterFetchesFromProviderAfterClearCache() async throws {
+    // Seed cache with a fake rate and long TTL
+    let cache = InMemoryRateCache(ttl: 3600)
+    await cache.store(
+        ConversionRateTable(base: .usd, rates: ["EUR": Decimal(string: "0.50")!]),
+        for: "USD"
+    )
+    let provider = MockProvider(rates: ["EUR": Decimal(string: "0.92")!])
+    let converter = CurrencyConverter(provider: provider, cache: cache)
+
+    // Confirm cache is active
+    let cachedRate = try await converter.rate(from: .usd, to: .eur)
+    #expect(cachedRate == Decimal(string: "0.50")!)
+
+    // Clear and re-fetch
+    await converter.clearCache()
+    let freshRate = try await converter.rate(from: .usd, to: .eur)
+    #expect(freshRate == Decimal(string: "0.92")!)
+}
+
+// MARK: - forceUpdate
+
+@Test func converterForceUpdateBypassesValidCache() async throws {
+    let cache = InMemoryRateCache(ttl: 3600)
+    await cache.store(
+        ConversionRateTable(base: .usd, rates: ["EUR": Decimal(string: "0.50")!]),
+        for: "USD"
+    )
+    let provider = MockProvider(rates: ["EUR": Decimal(string: "0.92")!])
+    let converter = CurrencyConverter(provider: provider, cache: cache)
+
+    // Normal fetch returns cached value
+    let cached = try await converter.rate(from: .usd, to: .eur)
+    #expect(cached == Decimal(string: "0.50")!)
+
+    // Force update bypasses cache and returns provider value
+    let forced = try await converter.rate(from: .usd, to: .eur, forceUpdate: true)
+    #expect(forced == Decimal(string: "0.92")!)
+}
+
+@Test func converterForceUpdateWritesBackToCache() async throws {
+    let cache = InMemoryRateCache(ttl: 3600)
+    await cache.store(
+        ConversionRateTable(base: .usd, rates: ["EUR": Decimal(string: "0.50")!]),
+        for: "USD"
+    )
+    let provider = MockProvider(rates: ["EUR": Decimal(string: "0.92")!])
+    let converter = CurrencyConverter(provider: provider, cache: cache)
+
+    // Force update
+    _ = try await converter.rate(from: .usd, to: .eur, forceUpdate: true)
+
+    // Subsequent normal fetch should return the updated cached value, not the old one
+    let rate = try await converter.rate(from: .usd, to: .eur)
+    #expect(rate == Decimal(string: "0.92")!)
+}
+
+@Test func converterForceUpdatePropagatesProviderError() async {
+    let cache = InMemoryRateCache(ttl: 3600)
+    await cache.store(
+        ConversionRateTable(base: .usd, rates: ["EUR": Decimal(string: "0.50")!]),
+        for: "USD"
+    )
+    let converter = CurrencyConverter(provider: FailingProvider(), cache: cache)
+
+    // Normal fetch succeeds from cache
+    let cached = try! await converter.rate(from: .usd, to: .eur)
+    #expect(cached == Decimal(string: "0.50")!)
+
+    // Force update hits the failing provider and must propagate the error
+    do {
+        _ = try await converter.rate(from: .usd, to: .eur, forceUpdate: true)
+        #expect(Bool(false), "Should have thrown")
+    } catch is ExchangeRateError {
+        // expected
+    } catch {
+        #expect(Bool(false), "Wrong error type: \(error)")
+    }
+}
+
+@Test func converterForceUpdateDoesNotCorruptCacheOnFailure() async throws {
+    let cache = InMemoryRateCache(ttl: 3600)
+    await cache.store(
+        ConversionRateTable(base: .usd, rates: ["EUR": Decimal(string: "0.50")!]),
+        for: "USD"
+    )
+    let converter = CurrencyConverter(provider: FailingProvider(), cache: cache)
+
+    // Force update fails
+    do {
+        _ = try await converter.rate(from: .usd, to: .eur, forceUpdate: true)
+    } catch {
+        // expected
+    }
+
+    // Cache must still have the original value — the failed forceUpdate must not corrupt it
+    let rate = try await converter.rate(from: .usd, to: .eur)
+    #expect(rate == Decimal(string: "0.50")!)
 }
