@@ -223,8 +223,18 @@ private struct EmptyPairProvider: ExchangeRateProvider {
     #expect(rate == Decimal(string: "0.92")!)
 }
 
-@Test func refreshFailedErrorDescription() {
-    let error = ExchangeRateError.refreshFailed(currencies: [.usd, .eur])
-    #expect(error.errorDescription?.contains("USD") == true)
-    #expect(error.errorDescription?.contains("EUR") == true)
+// MARK: - CurrencyConverter with injected cache
+
+@Test func converterWithDiskCache() async throws {
+    let url = FileManager.default.temporaryDirectory.appendingPathComponent("test_\(UUID()).json")
+    defer { try? FileManager.default.removeItem(at: url) }
+
+    let diskCache = DiskRateCache(fileURL: url, ttl: 3600)
+    let converter = CurrencyConverter(cache: diskCache)
+    let rate = try await converter.rate(from: .usd, to: .eur)
+    #expect(rate > Decimal(string: "0.8")! && rate < 1)
+
+    // Verify it was persisted
+    let cache2 = DiskRateCache(fileURL: url, ttl: 3600)
+    #expect(await cache2.rate(from: .usd, to: .eur) != nil)
 }

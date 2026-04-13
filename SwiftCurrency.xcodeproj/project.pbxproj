@@ -20,8 +20,12 @@
 		2EA716CF2F8D75AB003DF5C9 /* ExchangeRateError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2EA716C42F8D75AB003DF5C9 /* ExchangeRateError.swift */; };
 		2EA716D02F8D75AB003DF5C9 /* InMemoryRateCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2EA716BB2F8D75AB003DF5C9 /* InMemoryRateCache.swift */; };
 		488E3059238F886598A1A10A /* SwiftCurrency.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = AB27007FA6EAB22AEB7A489E /* SwiftCurrency.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		48AC2D8D4C4B221F98B6DF32 /* RateCacheTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D4C23D3A3251F4005BA326A /* RateCacheTests.swift */; };
-		8BA569FA418BC78EDDA1B48C /* SwiftCurrencyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4512E9FDA03DF5BDCEB482B5 /* SwiftCurrencyTests.swift */; };
+		A1B2C3D4E5F60001AABB0001 /* CurrencyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60002AABB0001 /* CurrencyTests.swift */; };
+		A1B2C3D4E5F60001AABB0002 /* ConversionRateTableTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60002AABB0002 /* ConversionRateTableTests.swift */; };
+		A1B2C3D4E5F60001AABB0003 /* LocalExchangeRateProviderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60002AABB0003 /* LocalExchangeRateProviderTests.swift */; };
+		A1B2C3D4E5F60001AABB0004 /* ExchangeRateErrorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60002AABB0004 /* ExchangeRateErrorTests.swift */; };
+		A1B2C3D4E5F60001AABB0005 /* InMemoryRateCacheTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60002AABB0005 /* InMemoryRateCacheTests.swift */; };
+		A1B2C3D4E5F60001AABB0006 /* DiskRateCacheTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60002AABB0006 /* DiskRateCacheTests.swift */; };
 		E3C6ADA839C9E52F92881C17 /* FrankfurterProviderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C56FB5AEC6192DD22839F91F /* FrankfurterProviderTests.swift */; };
 		FB5DD27923F2D1F208BD6D0E /* SwiftCurrency.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AB27007FA6EAB22AEB7A489E /* SwiftCurrency.framework */; };
 /* End PBXBuildFile section */
@@ -62,8 +66,12 @@
 		2EA716C22F8D75AB003DF5C9 /* Currency.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Currency.swift; sourceTree = "<group>"; };
 		2EA716C32F8D75AB003DF5C9 /* Currency+All.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Currency+All.swift"; sourceTree = "<group>"; };
 		2EA716C42F8D75AB003DF5C9 /* ExchangeRateError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExchangeRateError.swift; sourceTree = "<group>"; };
-		4512E9FDA03DF5BDCEB482B5 /* SwiftCurrencyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftCurrencyTests.swift; sourceTree = "<group>"; };
-		9D4C23D3A3251F4005BA326A /* RateCacheTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RateCacheTests.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F60002AABB0001 /* CurrencyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrencyTests.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F60002AABB0002 /* ConversionRateTableTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConversionRateTableTests.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F60002AABB0003 /* LocalExchangeRateProviderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalExchangeRateProviderTests.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F60002AABB0004 /* ExchangeRateErrorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExchangeRateErrorTests.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F60002AABB0005 /* InMemoryRateCacheTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InMemoryRateCacheTests.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F60002AABB0006 /* DiskRateCacheTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiskRateCacheTests.swift; sourceTree = "<group>"; };
 		AB27007FA6EAB22AEB7A489E /* SwiftCurrency.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SwiftCurrency.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		B842031D32B5C67B329499F6 /* SwiftCurrencyTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SwiftCurrencyTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		C56FB5AEC6192DD22839F91F /* FrankfurterProviderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FrankfurterProviderTests.swift; sourceTree = "<group>"; };
@@ -85,6 +93,7 @@
 		2EA716B92F8D75AB003DF5C9 /* RateCache */ = {
 			isa = PBXGroup;
 			children = (
+				2EA716C02F8D75AB003DF5C9 /* RateCache.swift */,
 				2EA716B72F8D75AB003DF5C9 /* FrankfurterExchangeRateProvider.swift */,
 				2EA716B82F8D75AB003DF5C9 /* LocalExchangeRateProvider.swift */,
 			);
@@ -94,6 +103,7 @@
 		2EA716BC2F8D75AB003DF5C9 /* ExchangeRateProvider */ = {
 			isa = PBXGroup;
 			children = (
+				2EA716BF2F8D75AB003DF5C9 /* ExchangeRateProvider.swift */,
 				2EA716BA2F8D75AB003DF5C9 /* DiskRateCache.swift */,
 				2EA716BB2F8D75AB003DF5C9 /* InMemoryRateCache.swift */,
 			);
@@ -105,10 +115,8 @@
 			children = (
 				2EA716BE2F8D75AB003DF5C9 /* CurrencyConverter.swift */,
 				2EA716BD2F8D75AB003DF5C9 /* ConversionRateTable.swift */,
-				2EA716B92F8D75AB003DF5C9 /* RateCache */,
-				2EA716C02F8D75AB003DF5C9 /* RateCache.swift */,
 				2EA716BC2F8D75AB003DF5C9 /* ExchangeRateProvider */,
-				2EA716BF2F8D75AB003DF5C9 /* ExchangeRateProvider.swift */,
+				2EA716B92F8D75AB003DF5C9 /* RateCache */,
 			);
 			path = CurrencyConverter;
 			sourceTree = "<group>";
@@ -136,10 +144,14 @@
 		57FDAD0B7D666E7125DBAF4A /* SwiftCurrencyTests */ = {
 			isa = PBXGroup;
 			children = (
-				C56FB5AEC6192DD22839F91F /* FrankfurterProviderTests.swift */,
+				A1B2C3D4E5F60002AABB0001 /* CurrencyTests.swift */,
+				A1B2C3D4E5F60002AABB0002 /* ConversionRateTableTests.swift */,
+				A1B2C3D4E5F60002AABB0003 /* LocalExchangeRateProviderTests.swift */,
+				A1B2C3D4E5F60002AABB0004 /* ExchangeRateErrorTests.swift */,
+				A1B2C3D4E5F60002AABB0005 /* InMemoryRateCacheTests.swift */,
+				A1B2C3D4E5F60002AABB0006 /* DiskRateCacheTests.swift */,
 				DB8E902C9D7251D0A1324EC8 /* CurrencyConverterTests.swift */,
-				9D4C23D3A3251F4005BA326A /* RateCacheTests.swift */,
-				4512E9FDA03DF5BDCEB482B5 /* SwiftCurrencyTests.swift */,
+				C56FB5AEC6192DD22839F91F /* FrankfurterProviderTests.swift */,
 			);
 			name = SwiftCurrencyTests;
 			path = Tests/SwiftCurrencyTests;
@@ -246,10 +258,14 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A1B2C3D4E5F60001AABB0001 /* CurrencyTests.swift in Sources */,
+				A1B2C3D4E5F60001AABB0002 /* ConversionRateTableTests.swift in Sources */,
+				A1B2C3D4E5F60001AABB0003 /* LocalExchangeRateProviderTests.swift in Sources */,
+				A1B2C3D4E5F60001AABB0004 /* ExchangeRateErrorTests.swift in Sources */,
+				A1B2C3D4E5F60001AABB0005 /* InMemoryRateCacheTests.swift in Sources */,
+				A1B2C3D4E5F60001AABB0006 /* DiskRateCacheTests.swift in Sources */,
 				11D9BD313BA5D499ACB55CDA /* CurrencyConverterTests.swift in Sources */,
 				E3C6ADA839C9E52F92881C17 /* FrankfurterProviderTests.swift in Sources */,
-				48AC2D8D4C4B221F98B6DF32 /* RateCacheTests.swift in Sources */,
-				8BA569FA418BC78EDDA1B48C /* SwiftCurrencyTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
