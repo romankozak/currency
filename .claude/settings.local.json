@@ -3,7 +3,10 @@
     "allow": [
       "Bash(swift package:*)",
       "Bash(swift build:*)",
-      "Bash(swift test:*)"
+      "Bash(swift test:*)",
+      "Bash(tuist version:*)",
+      "Bash(tuist generate:*)",
+      "Bash(tuist test:*)"
     ]
   }
 }

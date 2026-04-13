@@ -1,4 +1,4 @@
-// swift-tools-version: 6.3
+// swift-tools-version: 6.0
 
 import PackageDescription
 
@@ -12,10 +12,22 @@ let package = Package(
     ],
     products: [
         .library(name: "SwiftCurrency", targets: ["SwiftCurrency"]),
+        .library(name: "SwiftCurrencyFrankfurter", targets: ["SwiftCurrencyFrankfurter"]),
     ],
     targets: [
         .target(name: "SwiftCurrency"),
-        .testTarget(name: "SwiftCurrencyTests", dependencies: ["SwiftCurrency"]),
+        .target(
+            name: "SwiftCurrencyFrankfurter",
+            dependencies: ["SwiftCurrency"]
+        ),
+        .testTarget(
+            name: "SwiftCurrencyTests",
+            dependencies: ["SwiftCurrency"]
+        ),
+        .testTarget(
+            name: "SwiftCurrencyFrankfurterTests",
+            dependencies: ["SwiftCurrencyFrankfurter", "SwiftCurrency"]
+        ),
     ],
     swiftLanguageModes: [.v6]
 )

@@ -103,7 +103,6 @@ import Testing
 }
 
 @Test func allCurrenciesHasUniqueCodesExceptALL() {
-    // ALL (Albanian Lek) is .allLek to avoid name collision, but its code is still "ALL"
     let codes = Currency.allCurrencies.map(\.code)
     let unique = Set(codes)
     #expect(codes.count == unique.count)
@@ -187,7 +186,6 @@ import Testing
     let rates = try await provider.fetchRates(for: .jpy)
     #expect(rates.base == .jpy)
     #expect(abs(rates.rate(for: .jpy)! - 1.0) < 0.001)
-    // JPY to USD should be small (1/149.50 ≈ 0.0067)
     let jpyToUsd = rates.rate(for: .usd)!
     #expect(jpyToUsd > 0.005 && jpyToUsd < 0.01)
 }
@@ -197,7 +195,6 @@ import Testing
     let usdRates = try await provider.fetchRates(for: .usd)
     let eurRates = try await provider.fetchRates(for: .eur)
 
-    // USD→EUR rate × EUR→USD rate should ≈ 1.0
     let usdToEur = usdRates.rate(for: .eur)!
     let eurToUsd = eurRates.rate(for: .usd)!
     #expect(abs(usdToEur * eurToUsd - 1.0) < 0.001)
@@ -233,7 +230,6 @@ import Testing
 
 private struct MockProvider: ExchangeRateProvider {
     var rates: [String: Double]
-    var callCount = 0
 
     func fetchRates(for base: Currency) async throws -> ConversionRate {
         ConversionRate(base: base, rates: rates)
@@ -319,7 +315,6 @@ private struct FailingProvider: ExchangeRateProvider {
 }
 
 @Test func converterCaching() async throws {
-    // With a mock that returns fixed rates, two calls should hit cache on the second
     let mock = MockProvider(rates: ["EUR": 0.92])
     let converter = CurrencyConverter(provider: mock, cacheDuration: 3600)
     let rate1 = try await converter.rate(from: .usd, to: .eur)
@@ -332,14 +327,12 @@ private struct FailingProvider: ExchangeRateProvider {
     let converter = CurrencyConverter(provider: mock, cacheDuration: 3600)
     _ = try await converter.rate(from: .usd, to: .eur)
     await converter.clearCache()
-    // Should still work after clearing — fetches again
     let rate = try await converter.rate(from: .usd, to: .eur)
     #expect(rate == 0.92)
 }
 
 @Test func converterExpiredCacheRefetches() async throws {
     let mock = MockProvider(rates: ["EUR": 0.92])
-    // Use 0 cache duration so it always refetches
     let converter = CurrencyConverter(provider: mock, cacheDuration: 0)
     let rate1 = try await converter.rate(from: .usd, to: .eur)
     let rate2 = try await converter.rate(from: .usd, to: .eur)
@@ -372,13 +365,10 @@ private struct FailingProvider: ExchangeRateProvider {
     let provider = LocalExchangeRateProvider()
     let usdRates = try await provider.fetchRates(for: .usd)
 
-    // Convert $100 to EUR
     let euros = usdRates.convert(100, to: .eur)!
 
-    // Now convert back from EUR rates
     let eurRates = try await provider.fetchRates(for: .eur)
     let backToUsd = eurRates.convert(euros, to: .usd)!
 
-    // Should be approximately $100
     #expect(abs(backToUsd - 100.0) < 0.01)
 }
