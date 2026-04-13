@@ -12,7 +12,7 @@ import Foundation
 /// let rates = try await provider.fetchRates(for: .usd)
 /// let eurRate = rates.rate(for: .eur)
 /// ```
-public struct FrankfurterExchangeRateProvider: ExchangeRateProvider {
+public struct FrankfurterExchangeRateProvider: ExchangeRateProviding {
     private let session: URLSession
     private let baseURL: URL
 

@@ -4,7 +4,7 @@ import Foundation
 /// Useful for testing, previews, and offline use.
 ///
 /// Rates are approximate and relative to USD.
-public struct LocalExchangeRateProvider: ExchangeRateProvider {
+public struct LocalExchangeRateProvider: ExchangeRateProviding {
     /// Approximate rates relative to 1 USD (as of early 2025).
     public static let stubbedRatesFromUSD: [String: Decimal] = [
         "USD": 1,

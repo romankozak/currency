@@ -4,7 +4,7 @@ import Foundation
 ///
 /// Reads the full cache from disk on initialization and writes atomically
 /// on every store/clear operation.
-public actor DiskRateCache: RateCache {
+public actor LocalFileRateCache: RateCaching {
     private var storage: [String: ConversionRateTable]
     private let ttl: TimeInterval
     private let fileURL: URL

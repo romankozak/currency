@@ -4,7 +4,7 @@ import Foundation
 ///
 /// Implementations handle TTL expiration internally — protocol methods
 /// return `nil` for expired entries.
-public protocol RateCache: Sendable {
+public protocol RateCaching: Sendable {
     /// Retrieves the cached `ConversionRateTable` for a base currency code,
     /// or `nil` if missing or expired.
     func conversionRate(for baseCurrencyCode: String) async -> ConversionRateTable?

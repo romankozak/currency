@@ -8,14 +8,14 @@ import Foundation
 /// let amount = try await converter.convert(100, from: .usd, to: .gbp)
 /// ```
 public actor CurrencyConverter {
-    private let provider: ExchangeRateProvider
-    private let rateCache: any RateCache
+    private let provider: ExchangeRateProviding
+    private let rateCache: any RateCaching
 
     /// Creates a converter with an in-memory cache.
     /// - Parameters:
     ///   - provider: The exchange rate data source. Defaults to ``LocalExchangeRateProvider``.
     ///   - cacheDuration: How long fetched rates are cached, in seconds. Defaults to 1 hour.
-    public init(provider: ExchangeRateProvider = LocalExchangeRateProvider(), cacheDuration: TimeInterval = 3600) {
+    public init(provider: ExchangeRateProviding = LocalExchangeRateProvider(), cacheDuration: TimeInterval = 3600) {
         self.provider = provider
         self.rateCache = InMemoryRateCache(ttl: cacheDuration)
     }
@@ -24,7 +24,7 @@ public actor CurrencyConverter {
     /// - Parameters:
     ///   - provider: The exchange rate data source. Defaults to ``LocalExchangeRateProvider``.
     ///   - cache: The cache to use for storing fetched rates.
-    public init(provider: ExchangeRateProvider = LocalExchangeRateProvider(), cache: any RateCache) {
+    public init(provider: ExchangeRateProviding = LocalExchangeRateProvider(), cache: any RateCaching) {
         self.provider = provider
         self.rateCache = cache
     }

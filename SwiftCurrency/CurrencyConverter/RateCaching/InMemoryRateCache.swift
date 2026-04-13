@@ -1,7 +1,7 @@
 import Foundation
 
 /// An in-memory rate cache backed by a dictionary.
-public actor InMemoryRateCache: RateCache {
+public actor InMemoryRateCache: RateCaching {
     private var storage: [String: ConversionRateTable] = [:]
     private let ttl: TimeInterval
 

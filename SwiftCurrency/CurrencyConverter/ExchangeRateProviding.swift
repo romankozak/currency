@@ -1,5 +1,5 @@
 /// A provider that can fetch exchange rates for a given base currency.
-public protocol ExchangeRateProvider: Sendable {
+public protocol ExchangeRateProviding: Sendable {
     /// Fetches exchange rates relative to the given base currency.
     func fetchRates(for base: Currency) async throws -> ConversionRateTable
 
@@ -12,7 +12,7 @@ public protocol ExchangeRateProvider: Sendable {
     func fetchRate(from base: Currency, to target: Currency) async throws -> ConversionRateTable
 }
 
-extension ExchangeRateProvider {
+extension ExchangeRateProviding {
     public func fetchRate(from base: Currency, to target: Currency) async throws -> ConversionRateTable {
         let full = try await fetchRates(for: base)
         guard let rate = full.rate(for: target) else {

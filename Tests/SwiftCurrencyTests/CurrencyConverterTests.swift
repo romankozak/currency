@@ -4,7 +4,7 @@ import Testing
 
 // MARK: - Mock providers
 
-private struct MockProvider: ExchangeRateProvider {
+private struct MockProvider: ExchangeRateProviding {
     var rates: [String: Decimal]
     var failingBases: Set<String> = []
 
@@ -16,14 +16,14 @@ private struct MockProvider: ExchangeRateProvider {
     }
 }
 
-private struct FailingProvider: ExchangeRateProvider {
+private struct FailingProvider: ExchangeRateProviding {
     func fetchRates(for base: Currency) async throws -> ConversionRateTable {
         throw ExchangeRateError.invalidResponse
     }
 }
 
 /// A provider whose fetchRate always returns an empty ConversionRateTable (no rates for target).
-private struct EmptyPairProvider: ExchangeRateProvider {
+private struct EmptyPairProvider: ExchangeRateProviding {
     func fetchRates(for base: Currency) async throws -> ConversionRateTable {
         ConversionRateTable(base: base, rates: [:])
     }
@@ -229,12 +229,12 @@ private struct EmptyPairProvider: ExchangeRateProvider {
     let url = FileManager.default.temporaryDirectory.appendingPathComponent("test_\(UUID()).json")
     defer { try? FileManager.default.removeItem(at: url) }
 
-    let diskCache = DiskRateCache(fileURL: url, ttl: 3600)
+    let diskCache = LocalFileRateCache(fileURL: url, ttl: 3600)
     let converter = CurrencyConverter(cache: diskCache)
     let rate = try await converter.rate(from: .usd, to: .eur)
     #expect(rate > Decimal(string: "0.8")! && rate < 1)
 
     // Verify it was persisted
-    let cache2 = DiskRateCache(fileURL: url, ttl: 3600)
+    let cache2 = LocalFileRateCache(fileURL: url, ttl: 3600)
     #expect(await cache2.rate(from: .usd, to: .eur) != nil)
 }

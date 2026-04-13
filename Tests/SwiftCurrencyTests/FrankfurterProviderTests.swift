@@ -5,7 +5,7 @@ import Testing
 // MARK: - FrankfurterExchangeRateProvider unit tests (no network)
 
 @Test func frankfurterProviderConformsToProtocol() {
-    let provider: any ExchangeRateProvider = FrankfurterExchangeRateProvider()
+    let provider: any ExchangeRateProviding = FrankfurterExchangeRateProvider()
     #expect(type(of: provider) is FrankfurterExchangeRateProvider.Type)
 }
 
