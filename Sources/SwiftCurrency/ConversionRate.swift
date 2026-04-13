@@ -1,7 +1,7 @@
 import Foundation
 
 /// A snapshot of exchange rates from a base currency.
-public struct ConversionRate: Sendable {
+public struct ConversionRate: Sendable, Codable {
     /// The base currency these rates are relative to.
     public let base: Currency
 

@@ -9,40 +9,36 @@ import Foundation
 /// ```
 public actor CurrencyConverter {
     private let provider: ExchangeRateProvider
-    private var cache: [String: ConversionRate] = [:]
-    private let cacheDuration: TimeInterval
+    private let rateCache: any RateCache
 
-    /// Creates a converter.
+    /// Creates a converter with an in-memory cache.
     /// - Parameters:
     ///   - provider: The exchange rate data source. Defaults to ``LocalExchangeRateProvider``.
     ///   - cacheDuration: How long fetched rates are cached, in seconds. Defaults to 1 hour.
     public init(provider: ExchangeRateProvider = LocalExchangeRateProvider(), cacheDuration: TimeInterval = 3600) {
         self.provider = provider
-        self.cacheDuration = cacheDuration
+        self.rateCache = InMemoryRateCache(ttl: cacheDuration)
+    }
+
+    /// Creates a converter with an explicit cache implementation.
+    /// - Parameters:
+    ///   - provider: The exchange rate data source. Defaults to ``LocalExchangeRateProvider``.
+    ///   - cache: The cache to use for storing fetched rates.
+    public init(provider: ExchangeRateProvider = LocalExchangeRateProvider(), cache: any RateCache) {
+        self.provider = provider
+        self.rateCache = cache
     }
 
     /// Returns the exchange rate from one currency to another.
     ///
     /// Uses the provider's single-pair endpoint when available, falling back to cached full rates.
     public func rate(from source: Currency, to target: Currency, forceUpdate: Bool = false) async throws -> Decimal {
-        // Check cache first
-        if !forceUpdate,
-           let cached = cache[source.code], Date().timeIntervalSince(cached.date) < cacheDuration,
-           let r = cached.rate(for: target) {
+        if !forceUpdate, let r = await rateCache.rate(from: source, to: target) {
             return r
         }
 
         let pairRate = try await provider.fetchRate(from: source, to: target)
-        // Merge the fetched pair into the existing cache entry or create a new one
-        if let existing = cache[source.code] {
-            var merged = existing.rates
-            for (key, value) in pairRate.rates {
-                merged[key] = value
-            }
-            cache[source.code] = ConversionRate(base: source, rates: merged, date: pairRate.date)
-        } else {
-            cache[source.code] = pairRate
-        }
+        await rateCache.store(pairRate, for: source.code)
 
         guard let r = pairRate.rate(for: target) else {
             throw ExchangeRateError.unsupportedCurrency(target.code)
@@ -70,7 +66,7 @@ public actor CurrencyConverter {
         var currenciesToFetch: [Currency] = additionalCurrencies
 
         if refreshCached {
-            for code in cache.keys {
+            for code in await rateCache.allBaseCurrencyCodes() {
                 if let currency = Currency.find(code),
                    !currenciesToFetch.contains(currency) {
                     currenciesToFetch.append(currency)
@@ -106,7 +102,7 @@ public actor CurrencyConverter {
         for (currency, result) in results {
             switch result {
             case .success(let rates):
-                cache[currency.code] = rates
+                await rateCache.store(rates, for: currency.code)
             case .failure:
                 failed.append(currency)
             }
@@ -118,8 +114,8 @@ public actor CurrencyConverter {
     }
 
     /// Clears the cached rates.
-    public func clearCache() {
-        cache.removeAll()
+    public func clearCache() async {
+        await rateCache.clear()
     }
 
 }
