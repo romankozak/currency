@@ -29,8 +29,12 @@ extension Currency: CustomStringConvertible {
 // MARK: - Lookup
 
 extension Currency {
+    private static let currencyByCode: [String: Currency] = {
+        Dictionary(uniqueKeysWithValues: allCurrencies.map { ($0.code, $0) })
+    }()
+
     /// Returns the currency matching the given ISO 4217 code, or `nil` if unknown.
     public static func find(_ code: String) -> Currency? {
-        allCurrencies.first { $0.code == code.uppercased() }
+        currencyByCode[code.uppercased()]
     }
 }
