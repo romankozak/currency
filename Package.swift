@@ -14,7 +14,7 @@ let package = Package(
         .library(name: "SwiftCurrency", targets: ["SwiftCurrency"]),
     ],
     targets: [
-        .target(name: "SwiftCurrency"),
+        .target(name: "SwiftCurrency", path: "SwiftCurrency"),
         .testTarget(
             name: "SwiftCurrencyTests",
             dependencies: ["SwiftCurrency"]
