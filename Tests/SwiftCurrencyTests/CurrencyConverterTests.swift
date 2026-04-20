@@ -27,10 +27,6 @@ private struct EmptyPairProvider: ExchangeRateProviding {
     func fetchRates(for base: Currency) async throws -> ConversionRateTable {
         ConversionRateTable(base: base, rates: [:])
     }
-
-    func fetchRate(from base: Currency, to target: Currency) async throws -> ConversionRateTable {
-        ConversionRateTable(base: base, rates: [:])
-    }
 }
 
 // MARK: - CurrencyConverter
@@ -131,12 +127,6 @@ private struct EmptyPairProvider: ExchangeRateProviding {
     #expect(rate1 == Decimal(string: "0.92")!)
 }
 
-@Test func converterUsesSinglePairMethod() async throws {
-    let mock = MockProvider(rates: ["EUR": 2, "GBP": 3])
-    let converter = CurrencyConverter(provider: mock)
-    let rate = try await converter.rate(from: .usd, to: .eur)
-    #expect(rate == 2)
-}
 
 @Test func converterCachePopulatedAfterRate() async throws {
     let mock = MockProvider(rates: ["EUR": Decimal(string: "0.92")!, "GBP": Decimal(string: "0.79")!])
@@ -301,82 +291,3 @@ private struct EmptyPairProvider: ExchangeRateProviding {
     #expect(freshRate == Decimal(string: "0.92")!)
 }
 
-// MARK: - forceUpdate
-
-@Test func converterForceUpdateBypassesValidCache() async throws {
-    let cache = InMemoryRateCache(ttl: 3600)
-    await cache.store(
-        ConversionRateTable(base: .usd, rates: ["EUR": Decimal(string: "0.50")!]),
-        for: "USD"
-    )
-    let provider = MockProvider(rates: ["EUR": Decimal(string: "0.92")!])
-    let converter = CurrencyConverter(provider: provider, cache: cache)
-
-    // Normal fetch returns cached value
-    let cached = try await converter.rate(from: .usd, to: .eur)
-    #expect(cached == Decimal(string: "0.50")!)
-
-    // Force update bypasses cache and returns provider value
-    let forced = try await converter.rate(from: .usd, to: .eur, forceUpdate: true)
-    #expect(forced == Decimal(string: "0.92")!)
-}
-
-@Test func converterForceUpdateWritesBackToCache() async throws {
-    let cache = InMemoryRateCache(ttl: 3600)
-    await cache.store(
-        ConversionRateTable(base: .usd, rates: ["EUR": Decimal(string: "0.50")!]),
-        for: "USD"
-    )
-    let provider = MockProvider(rates: ["EUR": Decimal(string: "0.92")!])
-    let converter = CurrencyConverter(provider: provider, cache: cache)
-
-    // Force update
-    _ = try await converter.rate(from: .usd, to: .eur, forceUpdate: true)
-
-    // Subsequent normal fetch should return the updated cached value, not the old one
-    let rate = try await converter.rate(from: .usd, to: .eur)
-    #expect(rate == Decimal(string: "0.92")!)
-}
-
-@Test func converterForceUpdatePropagatesProviderError() async {
-    let cache = InMemoryRateCache(ttl: 3600)
-    await cache.store(
-        ConversionRateTable(base: .usd, rates: ["EUR": Decimal(string: "0.50")!]),
-        for: "USD"
-    )
-    let converter = CurrencyConverter(provider: FailingProvider(), cache: cache)
-
-    // Normal fetch succeeds from cache
-    let cached = try! await converter.rate(from: .usd, to: .eur)
-    #expect(cached == Decimal(string: "0.50")!)
-
-    // Force update hits the failing provider and must propagate the error
-    do {
-        _ = try await converter.rate(from: .usd, to: .eur, forceUpdate: true)
-        #expect(Bool(false), "Should have thrown")
-    } catch is ExchangeRateError {
-        // expected
-    } catch {
-        #expect(Bool(false), "Wrong error type: \(error)")
-    }
-}
-
-@Test func converterForceUpdateDoesNotCorruptCacheOnFailure() async throws {
-    let cache = InMemoryRateCache(ttl: 3600)
-    await cache.store(
-        ConversionRateTable(base: .usd, rates: ["EUR": Decimal(string: "0.50")!]),
-        for: "USD"
-    )
-    let converter = CurrencyConverter(provider: FailingProvider(), cache: cache)
-
-    // Force update fails
-    do {
-        _ = try await converter.rate(from: .usd, to: .eur, forceUpdate: true)
-    } catch {
-        // expected
-    }
-
-    // Cache must still have the original value — the failed forceUpdate must not corrupt it
-    let rate = try await converter.rate(from: .usd, to: .eur)
-    #expect(rate == Decimal(string: "0.50")!)
-}

@@ -30,14 +30,12 @@ public actor CurrencyConverter {
     }
 
     /// Returns the exchange rate from one currency to another.
-    ///
-    /// Uses the provider's single-pair endpoint when available, falling back to cached full rates.
-    public func rate(from source: Currency, to target: Currency, forceUpdate: Bool = false) async throws -> Decimal {
-        if !forceUpdate, let r = await rateCache.rate(from: source, to: target) {
+    public func rate(from source: Currency, to target: Currency) async throws -> Decimal {
+        if let r = await rateCache.rate(from: source, to: target) {
             return r
         }
 
-        let rateTable = try await provider.fetchRate(from: source, to: target)
+        let rateTable = try await provider.fetchRates(for: source)
         await rateCache.store(rateTable, for: source.code)
 
         guard let r = rateTable.rate(for: target) else {
