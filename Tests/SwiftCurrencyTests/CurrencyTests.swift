@@ -13,12 +13,12 @@ import Testing
 }
 
 @Test func currencyDefaultMinorUnits() {
-    let custom = Currency(code: "TST", symbol: "T", name: "Test")
+    let custom = Currency(code: "TST", symbol: "T")
     #expect(custom.minorUnits == 2)
 }
 
 @Test func currencyCustomMinorUnits() {
-    let custom = Currency(code: "TST", symbol: "T", name: "Test", minorUnits: 5)
+    let custom = Currency(code: "TST", symbol: "T", minorUnits: 5)
     #expect(custom.minorUnits == 5)
 }
 
@@ -26,14 +26,14 @@ import Testing
     #expect(Currency.eur == Currency.eur)
     #expect(Currency.usd != Currency.gbp)
 
-    let copy = Currency(code: "USD", symbol: "$", name: "US Dollar")
+    let copy = Currency(code: "USD", symbol: "$")
     #expect(copy == Currency.usd)
 }
 
 @Test func currencyInequalityDifferentFields() {
-    let a = Currency(code: "USD", symbol: "$", name: "US Dollar")
-    let b = Currency(code: "USD", symbol: "US$", name: "US Dollar")
-    #expect(a != b)
+    let a = Currency(code: "USD", symbol: "$")
+    let b = Currency(code: "USD", symbol: "US$")
+    #expect(a == b)
 }
 
 @Test func currencyDescription() {

@@ -52,7 +52,7 @@ import Testing
 
 @Test func localProviderUnsupportedCurrency() async {
     let provider = LocalExchangeRateProvider()
-    let exotic = Currency(code: "XXX", symbol: "?", name: "Unknown")
+    let exotic = Currency(code: "XXX", symbol: "?")
     do {
         _ = try await provider.fetchRates(for: exotic)
         #expect(Bool(false), "Should have thrown")

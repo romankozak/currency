@@ -1,5 +1,7 @@
+import Foundation
+
 /// A currency identified by its ISO 4217 code, symbol, and descriptive name.
-public struct Currency: Sendable, Hashable, Codable {
+public struct Currency: Sendable, Codable {
     /// The ISO 4217 currency code (e.g. "USD", "EUR").
     public let code: String
 
@@ -7,16 +9,29 @@ public struct Currency: Sendable, Hashable, Codable {
     public let symbol: String
 
     /// The human-readable name (e.g. "US Dollar").
-    public let name: String
+    public var name: String {
+        Locale.current.localizedString(forCurrencyCode: code) ?? code
+    }
 
     /// The number of minor units (decimal places). Most currencies use 2.
     public let minorUnits: Int
 
-    public init(code: String, symbol: String, name: String, minorUnits: Int = 2) {
+    public init(code: String, symbol: String, minorUnits: Int = 2) {
         self.code = code
         self.symbol = symbol
-        self.name = name
         self.minorUnits = minorUnits
+    }
+}
+
+extension Currency: Equatable {
+    public static func == (lhs: Currency, rhs: Currency) -> Bool {
+        lhs.code == rhs.code
+    }
+}
+
+extension Currency: Hashable {
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(code)
     }
 }
 
