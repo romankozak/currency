@@ -72,11 +72,15 @@ public struct FrankfurterExchangeRateProvider: ExchangeRateProviding {
         }
     }
 
+    private static let dateFormatter: DateFormatter = {
+        let f = DateFormatter()
+        f.dateFormat = "yyyy-MM-dd"
+        f.timeZone = TimeZone(identifier: "UTC")
+        return f
+    }()
+
     private func parseDate(_ string: String) -> Date {
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "yyyy-MM-dd"
-        dateFormatter.timeZone = TimeZone(identifier: "UTC")
-        guard let parsed = dateFormatter.date(from: string) else { return Date() }
+        guard let parsed = Self.dateFormatter.date(from: string) else { return Date() }
         let calendar = Calendar.current
         let today = Date()
         let p = calendar.dateComponents([.day, .month], from: parsed)

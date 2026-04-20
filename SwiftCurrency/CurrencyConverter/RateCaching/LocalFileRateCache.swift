@@ -21,7 +21,7 @@ public actor LocalFileRateCache: RateCaching {
         conversionTable(for: source.code)?.rate(for: target)
     }
 
-    public func store(_ rateTable: ConversionRateTable, for baseCurrencyCode: String) {
+    public func store(_ rateTable: ConversionRateTable, for baseCurrencyCode: String) throws {
         if let existing = storage[baseCurrencyCode] {
             var rates = existing.rates
             for (key, value) in rateTable.rates {
@@ -31,25 +31,25 @@ public actor LocalFileRateCache: RateCaching {
         } else {
             storage[baseCurrencyCode] = rateTable
         }
-        writeToDisk()
+        try writeToDisk()
     }
 
     public func availableCurrencyCodes() -> [String] {
         Array(storage.keys)
     }
 
-    public func clear() {
+    public func clear() throws {
         storage.removeAll()
-        writeToDisk()
+        try writeToDisk()
     }
 
     // MARK: - Disk I/O
 
-    private func writeToDisk() {
+    private func writeToDisk() throws {
         let encoder = JSONEncoder()
         encoder.dateEncodingStrategy = .iso8601
-        guard let data = try? encoder.encode(storage) else { return }
-        try? data.write(to: fileURL, options: .atomic)
+        let data = try encoder.encode(storage)
+        try data.write(to: fileURL, options: .atomic)
     }
 
     private static func loadFromDisk(fileURL: URL) -> [String: ConversionRateTable] {

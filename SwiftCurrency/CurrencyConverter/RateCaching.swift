@@ -15,13 +15,13 @@ public protocol RateCaching: Sendable {
     ///
     /// If an entry already exists for the same code, the rates are merged
     /// (new rates overwrite existing ones for the same target currency).
-    func store(_ rateTable: ConversionRateTable, for baseCurrencyCode: String) async
+    func store(_ rateTable: ConversionRateTable, for baseCurrencyCode: String) async throws
 
     /// Returns all base currency codes currently held in the cache (expired or not).
     func availableCurrencyCodes() async -> [String]
 
     /// Removes all cached entries.
-    func clear() async
+    func clear() async throws
 }
 
 public extension RateCaching {

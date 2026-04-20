@@ -42,7 +42,7 @@ public actor CurrencyConverter {
         }
 
         let rateTable = try await provider.fetchRates(for: source)
-        await rateCache.store(rateTable, for: source.code)
+        try await rateCache.store(rateTable, for: source.code)
 
         guard let r = rateTable.rate(for: target) else {
             throw ExchangeRateError.unsupportedCurrency(target.code)
@@ -103,7 +103,7 @@ public actor CurrencyConverter {
         for (currency, result) in results {
             switch result {
             case .success(let rateTable):
-                await rateCache.store(rateTable, for: currency.code)
+                try? await rateCache.store(rateTable, for: currency.code)
             case .failure:
                 failed.append(currency)
             }
@@ -115,8 +115,8 @@ public actor CurrencyConverter {
     }
 
     /// Clears the cached rates.
-    public func clearCache() async {
-        await rateCache.clear()
+    public func clearCache() async throws {
+        try await rateCache.clear()
     }
 
 }

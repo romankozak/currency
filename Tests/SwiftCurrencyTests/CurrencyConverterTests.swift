@@ -113,7 +113,7 @@ private struct EmptyPairProvider: ExchangeRateProviding {
     let mock = MockProvider(rates: ["EUR": Decimal(string: "0.92")!])
     let converter = CurrencyConverter(provider: mock, cacheDuration: 3600)
     _ = try await converter.rate(from: .usd, to: .eur)
-    await converter.clearCache()
+    try await converter.clearCache()
     let rate = try await converter.rate(from: .usd, to: .eur)
     #expect(rate == Decimal(string: "0.92")!)
 }
@@ -286,7 +286,7 @@ private struct EmptyPairProvider: ExchangeRateProviding {
     #expect(cachedRate == Decimal(string: "0.50")!)
 
     // Clear and re-fetch
-    await converter.clearCache()
+    try await converter.clearCache()
     let freshRate = try await converter.rate(from: .usd, to: .eur)
     #expect(freshRate == Decimal(string: "0.92")!)
 }
