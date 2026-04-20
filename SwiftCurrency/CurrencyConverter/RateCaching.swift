@@ -23,3 +23,10 @@ public protocol RateCaching: Sendable {
     /// Removes all cached entries.
     func clear() async
 }
+
+public extension RateCaching {
+    /// Dictionary-style read access. Equivalent to `conversionTable(for:)`.
+    subscript(baseCurrencyCode: String) -> ConversionRateTable? {
+        get async { await conversionTable(for: baseCurrencyCode) }
+    }
+}
