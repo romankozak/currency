@@ -2,19 +2,37 @@ import Foundation
 
 /// A rate cache that persists exchange rates to a JSON file on disk.
 ///
-/// Reads the full cache from disk on initialization and writes atomically
-/// on every store/clear operation.
+/// Storage is loaded lazily on first access. Call ``loadFromDisk()`` explicitly
+/// to surface I/O or decode errors before reading or writing.
 public actor LocalFileRateCache: RateCaching {
-    private var storage: [String: ConversionRateTable]
+    private var storage: [String: ConversionRateTable]?
     private let fileURL: URL
 
     public init(fileURL: URL) {
         self.fileURL = fileURL
-        self.storage = Self.loadFromDisk(fileURL: fileURL)
     }
 
+    // MARK: - Explicit load
+
+    /// Loads the cache from disk, replacing any in-memory state.
+    /// Throws if the file exists but cannot be read or decoded.
+    /// A missing file is treated as an empty cache.
+    public func loadFromDisk() throws {
+        guard FileManager.default.fileExists(atPath: fileURL.path) else {
+            storage = [:]
+            return
+        }
+        let data = try Data(contentsOf: fileURL)
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        storage = try decoder.decode([String: ConversionRateTable].self, from: data)
+    }
+
+    // MARK: - RateCaching
+
     public func conversionTable(for baseCurrencyCode: String) -> ConversionRateTable? {
-        storage[baseCurrencyCode]
+        if storage == nil { try? loadFromDisk() }
+        return storage?[baseCurrencyCode]
     }
 
     public func rate(from source: Currency, to target: Currency) -> Decimal? {
@@ -22,24 +40,26 @@ public actor LocalFileRateCache: RateCaching {
     }
 
     public func store(_ rateTable: ConversionRateTable, for baseCurrencyCode: String) throws {
-        if let existing = storage[baseCurrencyCode] {
+        if storage == nil { try loadFromDisk() }
+        if let existing = storage?[baseCurrencyCode] {
             var rates = existing.rates
             for (key, value) in rateTable.rates {
                 rates[key] = value
             }
-            storage[baseCurrencyCode] = ConversionRateTable(base: rateTable.base, rates: rates, date: rateTable.date)
+            storage![baseCurrencyCode] = ConversionRateTable(base: rateTable.base, rates: rates, date: rateTable.date)
         } else {
-            storage[baseCurrencyCode] = rateTable
+            storage![baseCurrencyCode] = rateTable
         }
         try writeToDisk()
     }
 
     public func availableCurrencyCodes() -> [String] {
-        Array(storage.keys)
+        if storage == nil { try? loadFromDisk() }
+        return Array((storage ?? [:]).keys)
     }
 
     public func clear() throws {
-        storage.removeAll()
+        storage = [:]
         try writeToDisk()
     }
 
@@ -48,14 +68,7 @@ public actor LocalFileRateCache: RateCaching {
     private func writeToDisk() throws {
         let encoder = JSONEncoder()
         encoder.dateEncodingStrategy = .iso8601
-        let data = try encoder.encode(storage)
+        let data = try encoder.encode(storage ?? [:])
         try data.write(to: fileURL, options: .atomic)
-    }
-
-    private static func loadFromDisk(fileURL: URL) -> [String: ConversionRateTable] {
-        guard let data = try? Data(contentsOf: fileURL) else { return [:] }
-        let decoder = JSONDecoder()
-        decoder.dateDecodingStrategy = .iso8601
-        return (try? decoder.decode([String: ConversionRateTable].self, from: data)) ?? [:]
     }
 }
