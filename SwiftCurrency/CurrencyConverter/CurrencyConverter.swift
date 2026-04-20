@@ -52,34 +52,31 @@ public actor CurrencyConverter {
         return amount * r
     }
 
-    /// Refreshes cached exchange rates.
+    /// Refetches the full rate table for every currency already in the cache.
     ///
-    /// - Parameters:
-    ///   - refreshCached: If `true` (the default), refetches the full rate table for every currency already in the cache.
-    ///   - additionalCurrencies: Extra currencies to prefetch. Defaults to an empty list.
     /// - Throws: ``ExchangeRateError/refreshFailed(currencies:)`` if any currencies failed to fetch.
     ///           Successfully fetched currencies are still cached.
-    public func refreshCache(
-        refreshCached: Bool = true,
-        additionalCurrencies: [Currency] = []
-    ) async throws {
-        var currenciesToFetch: [Currency] = additionalCurrencies
+    public func refreshCache() async throws {
+        let currencies = await rateCache.allBaseCurrencyCodes().compactMap(Currency.find)
+        try await fetchAndCache(currencies)
+    }
 
-        if refreshCached {
-            for code in await rateCache.allBaseCurrencyCodes() {
-                if let currency = Currency.find(code),
-                   !currenciesToFetch.contains(currency) {
-                    currenciesToFetch.append(currency)
-                }
-            }
-        }
+    /// Fetches and caches rate tables for the given currencies.
+    ///
+    /// - Parameter currencies: The currencies to prefetch.
+    /// - Throws: ``ExchangeRateError/refreshFailed(currencies:)`` if any currencies failed to fetch.
+    ///           Successfully fetched currencies are still cached.
+    public func prefetchCurrencies(_ currencies: [Currency]) async throws {
+        try await fetchAndCache(currencies)
+    }
 
-        guard !currenciesToFetch.isEmpty else { return }
+    private func fetchAndCache(_ currencies: [Currency]) async throws {
+        guard !currencies.isEmpty else { return }
 
         let results = await withTaskGroup(
             of: (Currency, Result<ConversionRateTable, Error>).self
         ) { group in
-            for currency in currenciesToFetch {
+            for currency in currencies {
                 let provider = self.provider
                 group.addTask {
                     do {

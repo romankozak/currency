@@ -8,7 +8,7 @@ import Testing
     let cache = InMemoryRateCache(ttl: 3600)
     let rateTable = ConversionRateTable(base: .usd, rates: ["EUR": Decimal(string: "0.92")!])
     await cache.store(rateTable, for: "USD")
-    let retrieved = await cache.conversionRate(for: "USD")
+    let retrieved = await cache.conversionTable(for: "USD")
     #expect(retrieved != nil)
     #expect(retrieved!.rate(for: .eur) == Decimal(string: "0.92")!)
 }
@@ -23,7 +23,7 @@ import Testing
 
 @Test func inMemoryReturnsNilForMissing() async {
     let cache = InMemoryRateCache(ttl: 3600)
-    #expect(await cache.conversionRate(for: "USD") == nil)
+    #expect(await cache.conversionTable(for: "USD") == nil)
     #expect(await cache.rate(from: .usd, to: .eur) == nil)
 }
 
@@ -32,7 +32,7 @@ import Testing
     let rateTable = ConversionRateTable(base: .usd, rates: ["EUR": Decimal(string: "0.92")!])
     await cache.store(rateTable, for: "USD")
     // TTL is 0, so it's already expired
-    #expect(await cache.conversionRate(for: "USD") == nil)
+    #expect(await cache.conversionTable(for: "USD") == nil)
     #expect(await cache.rate(from: .usd, to: .eur) == nil)
 }
 
@@ -42,7 +42,7 @@ import Testing
     await cache.store(first, for: "USD")
     let second = ConversionRateTable(base: .usd, rates: ["GBP": Decimal(string: "0.79")!])
     await cache.store(second, for: "USD")
-    let retrieved = await cache.conversionRate(for: "USD")
+    let retrieved = await cache.conversionTable(for: "USD")
     #expect(retrieved!.rate(for: .eur) == Decimal(string: "0.92")!)
     #expect(retrieved!.rate(for: .gbp) == Decimal(string: "0.79")!)
 }
@@ -61,7 +61,7 @@ import Testing
     let rateTable = ConversionRateTable(base: .usd, rates: ["EUR": Decimal(string: "0.92")!])
     await cache.store(rateTable, for: "USD")
     await cache.clear()
-    #expect(await cache.conversionRate(for: "USD") == nil)
+    #expect(await cache.conversionTable(for: "USD") == nil)
     #expect(await cache.allBaseCurrencyCodes().isEmpty)
 }
 

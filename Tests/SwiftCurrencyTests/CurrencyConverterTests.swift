@@ -165,37 +165,28 @@ private struct EmptyPairProvider: ExchangeRateProviding {
     }
 }
 
-// MARK: - refreshCache
+// MARK: - prefetchCurrencies
 
-@Test func refreshCacheWithAdditionalCurrencies() async throws {
+@Test func prefetchCurrencies() async throws {
     let mock = MockProvider(rates: ["EUR": Decimal(string: "0.92")!, "GBP": Decimal(string: "0.79")!])
     let converter = CurrencyConverter(provider: mock, cacheDuration: 3600)
-    try await converter.refreshCache(refreshCached: false, additionalCurrencies: [.usd, .eur])
+    try await converter.prefetchCurrencies([.usd, .eur])
     // Now cached — should return from cache
     let rate = try await converter.rate(from: .usd, to: .eur)
     #expect(rate == Decimal(string: "0.92")!)
 }
 
-@Test func refreshCacheRefreshesCachedKeys() async throws {
-    let mock = MockProvider(rates: ["EUR": Decimal(string: "0.92")!])
-    let converter = CurrencyConverter(provider: mock, cacheDuration: 3600)
-    // Populate cache for USD
-    _ = try await converter.rate(from: .usd, to: .eur)
-    // Refresh should refetch USD
-    try await converter.refreshCache()
-}
-
-@Test func refreshCacheNoopWhenEmpty() async throws {
+@Test func prefetchCurrenciesNoopWhenEmpty() async throws {
     let converter = CurrencyConverter(provider: FailingProvider(), cacheDuration: 3600)
-    // No cache, no additional currencies — should not throw
-    try await converter.refreshCache(refreshCached: true, additionalCurrencies: [])
+    // Empty list — should not throw
+    try await converter.prefetchCurrencies([])
 }
 
-@Test func refreshCachePartialFailure() async {
+@Test func prefetchCurrenciesPartialFailure() async {
     let mock = MockProvider(rates: ["EUR": Decimal(string: "0.92")!], failingBases: ["EUR"])
     let converter = CurrencyConverter(provider: mock, cacheDuration: 3600)
     do {
-        try await converter.refreshCache(refreshCached: false, additionalCurrencies: [.usd, .eur])
+        try await converter.prefetchCurrencies([.usd, .eur])
         #expect(Bool(false), "Should have thrown")
     } catch let error as ExchangeRateError {
         switch error {
@@ -210,17 +201,34 @@ private struct EmptyPairProvider: ExchangeRateProviding {
     }
 }
 
-@Test func refreshCacheStillCachesSuccessfulOnPartialFailure() async throws {
+@Test func prefetchCurrenciesStillCachesSuccessfulOnPartialFailure() async throws {
     let mock = MockProvider(rates: ["EUR": Decimal(string: "0.92")!], failingBases: ["EUR"])
     let converter = CurrencyConverter(provider: mock, cacheDuration: 3600)
     do {
-        try await converter.refreshCache(refreshCached: false, additionalCurrencies: [.usd, .eur])
+        try await converter.prefetchCurrencies([.usd, .eur])
     } catch {
         // expected partial failure
     }
     // USD should have been cached successfully
     let rate = try await converter.rate(from: .usd, to: .eur)
     #expect(rate == Decimal(string: "0.92")!)
+}
+
+// MARK: - refreshCache
+
+@Test func refreshCacheRefreshesCachedKeys() async throws {
+    let mock = MockProvider(rates: ["EUR": Decimal(string: "0.92")!])
+    let converter = CurrencyConverter(provider: mock, cacheDuration: 3600)
+    // Populate cache for USD
+    _ = try await converter.rate(from: .usd, to: .eur)
+    // Refresh should refetch USD
+    try await converter.refreshCache()
+}
+
+@Test func refreshCacheNoopWhenEmpty() async throws {
+    let converter = CurrencyConverter(provider: FailingProvider(), cacheDuration: 3600)
+    // Empty cache — should not throw
+    try await converter.refreshCache()
 }
 
 // MARK: - CurrencyConverter with injected cache

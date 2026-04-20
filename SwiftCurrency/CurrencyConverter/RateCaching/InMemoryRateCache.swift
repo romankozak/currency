@@ -2,37 +2,42 @@ import Foundation
 
 /// An in-memory rate cache backed by a dictionary.
 public actor InMemoryRateCache: RateCaching {
-    private var storage: [String: ConversionRateTable] = [:]
+    private struct CacheEntry: Sendable {
+        let rateTable: ConversionRateTable
+        let storedAt: Date
+    }
+
+    private var storage: [String: CacheEntry] = [:]
     private let ttl: TimeInterval
 
     public init(ttl: TimeInterval = 3600) {
         self.ttl = ttl
     }
 
-    public func conversionRate(for baseCurrencyCode: String) -> ConversionRateTable? {
+    public func conversionTable(for baseCurrencyCode: String) -> ConversionRateTable? {
         guard let entry = storage[baseCurrencyCode],
-              Date().timeIntervalSince(entry.date) < ttl else {
+              Date().timeIntervalSince(entry.storedAt) < ttl else {
             return nil
         }
-        return entry
+        return entry.rateTable
     }
 
     public func rate(from source: Currency, to target: Currency) -> Decimal? {
-        conversionRate(for: source.code)?.rate(for: target)
+        conversionTable(for: source.code)?.rate(for: target)
     }
 
     public func store(_ rateTable: ConversionRateTable, for baseCurrencyCode: String) {
+        let merged: ConversionRateTable
         if let existing = storage[baseCurrencyCode] {
-            var merged = existing.rates
+            var rates = existing.rateTable.rates
             for (key, value) in rateTable.rates {
-                merged[key] = value
+                rates[key] = value
             }
-            storage[baseCurrencyCode] = ConversionRateTable(
-                base: rateTable.base, rates: merged, date: rateTable.date
-            )
+            merged = ConversionRateTable(base: rateTable.base, rates: rates, date: rateTable.date)
         } else {
-            storage[baseCurrencyCode] = rateTable
+            merged = rateTable
         }
+        storage[baseCurrencyCode] = CacheEntry(rateTable: merged, storedAt: Date())
     }
 
     public func allBaseCurrencyCodes() -> [String] {
