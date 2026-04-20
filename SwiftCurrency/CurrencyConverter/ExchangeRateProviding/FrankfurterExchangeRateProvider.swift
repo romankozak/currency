@@ -21,25 +21,6 @@ public struct FrankfurterExchangeRateProvider: ExchangeRateProviding {
         self.baseURL = baseURL
     }
 
-    public func fetchRate(from base: Currency, to target: Currency) async throws -> ConversionRateTable {
-        if base == target {
-            return ConversionRateTable(base: base, rates: [target.code: 1])
-        }
-
-        var components = URLComponents(url: baseURL.appendingPathComponent("latest"), resolvingAgainstBaseURL: false)!
-        components.queryItems = [
-            URLQueryItem(name: "from", value: base.code),
-            URLQueryItem(name: "to", value: target.code),
-        ]
-
-        let decoded = try await fetch(url: components.url!)
-
-        var rates = decoded.rates
-        rates[base.code] = 1
-
-        return ConversionRateTable(base: base, rates: rates, date: parseDate(decoded.date))
-    }
-
     public func fetchRates(for base: Currency) async throws -> ConversionRateTable {
         var components = URLComponents(url: baseURL.appendingPathComponent("latest"), resolvingAgainstBaseURL: false)!
         components.queryItems = [URLQueryItem(name: "from", value: base.code)]

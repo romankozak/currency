@@ -35,24 +35,6 @@ import Testing
 
 // MARK: - Live API contract tests
 
-@Test func frankfurterAPIResponseParsesCorrectly() async throws {
-    let provider = FrankfurterExchangeRateProvider()
-    let rateTable = try await provider.fetchRate(from: .usd, to: .eur)
-
-    // Base currency must match what we requested
-    #expect(rateTable.base == .usd)
-
-    // Must contain the target rate and it must be a sane positive value
-    let eurRate = rateTable.rate(for: .eur)
-    #expect(eurRate != nil, "EUR rate missing — API response structure may have changed")
-    #expect(eurRate! > 0, "EUR rate must be positive")
-
-    // Date must have been parsed (not the fallback Date())
-    let calendar = Calendar(identifier: .gregorian)
-    let year = calendar.component(.year, from: rateTable.date)
-    #expect(year >= 2024, "Date appears unparsed or invalid — API date format may have changed")
-}
-
 @Test func frankfurterAPIFullRateTableParsesCorrectly() async throws {
     let provider = FrankfurterExchangeRateProvider()
     let rateTable = try await provider.fetchRates(for: .usd)

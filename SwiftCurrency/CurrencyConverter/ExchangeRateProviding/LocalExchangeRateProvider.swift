@@ -92,24 +92,6 @@ public struct LocalExchangeRateProvider: ExchangeRateProviding {
 
     public init() {}
 
-    public func fetchRate(from base: Currency, to target: Currency) async throws -> ConversionRateTable {
-        let usdRates = Self.stubbedRatesFromUSD
-
-        guard let baseToUSD = usdRates[base.code] else {
-            throw ExchangeRateError.unsupportedCurrency(base.code)
-        }
-
-        if base == target {
-            return ConversionRateTable(base: base, rates: [target.code: 1])
-        }
-
-        guard let targetToUSD = usdRates[target.code] else {
-            throw ExchangeRateError.unsupportedCurrency(target.code)
-        }
-
-        return ConversionRateTable(base: base, rates: [target.code: targetToUSD / baseToUSD])
-    }
-
     public func fetchRates(for base: Currency) async throws -> ConversionRateTable {
         let usdRates = Self.stubbedRatesFromUSD
 
