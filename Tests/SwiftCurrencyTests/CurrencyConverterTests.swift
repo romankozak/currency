@@ -227,13 +227,13 @@ private struct EmptyPairProvider: ExchangeRateProviding {
     let url = FileManager.default.temporaryDirectory.appendingPathComponent("test_\(UUID()).json")
     defer { try? FileManager.default.removeItem(at: url) }
 
-    let diskCache = LocalFileRateCache(fileURL: url, ttl: 3600)
+    let diskCache = LocalFileRateCache(fileURL: url)
     let converter = CurrencyConverter(cache: diskCache)
     let rate = try await converter.rate(from: .usd, to: .eur)
     #expect(rate > Decimal(string: "0.8")! && rate < 1)
 
     // Verify it was persisted
-    let cache2 = LocalFileRateCache(fileURL: url, ttl: 3600)
+    let cache2 = LocalFileRateCache(fileURL: url)
     #expect(await cache2.rate(from: .usd, to: .eur) != nil)
 }
 
@@ -241,7 +241,7 @@ private struct EmptyPairProvider: ExchangeRateProviding {
 
 @Test func converterReturnsCachedRateWhenValid() async throws {
     // Seed cache with EUR = 0.50 (a clearly fake rate)
-    let cache = InMemoryRateCache(ttl: 3600)
+    let cache = InMemoryRateCache()
     await cache.store(
         ConversionRateTable(base: .usd, rates: ["EUR": Decimal(string: "0.50")!]),
         for: "USD"
@@ -256,24 +256,24 @@ private struct EmptyPairProvider: ExchangeRateProviding {
 }
 
 @Test func converterSkipsExpiredCacheAndFetchesFromProvider() async throws {
-    // Seed cache with a rate that will expire immediately (TTL = 0)
-    let cache = InMemoryRateCache(ttl: 0)
+    // Seed cache with a rate whose date is older than the converter's cacheDuration
+    let cache = InMemoryRateCache()
     await cache.store(
-        ConversionRateTable(base: .usd, rates: ["EUR": Decimal(string: "0.50")!]),
+        ConversionRateTable(base: .usd, rates: ["EUR": Decimal(string: "0.50")!], date: Date(timeIntervalSinceNow: -7200)),
         for: "USD"
     )
     // Provider returns a different rate
     let provider = MockProvider(rates: ["EUR": Decimal(string: "0.92")!])
-    let converter = CurrencyConverter(provider: provider, cache: cache)
+    let converter = CurrencyConverter(provider: provider, cache: cache, cacheDuration: 3600)
 
     let rate = try await converter.rate(from: .usd, to: .eur)
-    // Expired cache should be skipped → provider value returned
+    // Stale cache should be skipped → provider value returned
     #expect(rate == Decimal(string: "0.92")!)
 }
 
 @Test func converterFetchesFromProviderAfterClearCache() async throws {
-    // Seed cache with a fake rate and long TTL
-    let cache = InMemoryRateCache(ttl: 3600)
+    // Seed cache with a fake rate
+    let cache = InMemoryRateCache()
     await cache.store(
         ConversionRateTable(base: .usd, rates: ["EUR": Decimal(string: "0.50")!]),
         for: "USD"

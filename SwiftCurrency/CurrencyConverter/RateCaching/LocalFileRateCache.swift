@@ -5,27 +5,16 @@ import Foundation
 /// Reads the full cache from disk on initialization and writes atomically
 /// on every store/clear operation.
 public actor LocalFileRateCache: RateCaching {
-    private struct CacheEntry: Sendable, Codable {
-        let rateTable: ConversionRateTable
-        let storedAt: Date
-    }
-
-    private var storage: [String: CacheEntry]
-    private let ttl: TimeInterval
+    private var storage: [String: ConversionRateTable]
     private let fileURL: URL
 
-    public init(fileURL: URL, ttl: TimeInterval = 3600) {
+    public init(fileURL: URL) {
         self.fileURL = fileURL
-        self.ttl = ttl
         self.storage = Self.loadFromDisk(fileURL: fileURL)
     }
 
     public func conversionTable(for baseCurrencyCode: String) -> ConversionRateTable? {
-        guard let entry = storage[baseCurrencyCode],
-              Date().timeIntervalSince(entry.storedAt) < ttl else {
-            return nil
-        }
-        return entry.rateTable
+        storage[baseCurrencyCode]
     }
 
     public func rate(from source: Currency, to target: Currency) -> Decimal? {
@@ -33,17 +22,15 @@ public actor LocalFileRateCache: RateCaching {
     }
 
     public func store(_ rateTable: ConversionRateTable, for baseCurrencyCode: String) {
-        let merged: ConversionRateTable
         if let existing = storage[baseCurrencyCode] {
-            var rates = existing.rateTable.rates
+            var rates = existing.rates
             for (key, value) in rateTable.rates {
                 rates[key] = value
             }
-            merged = ConversionRateTable(base: rateTable.base, rates: rates, date: rateTable.date)
+            storage[baseCurrencyCode] = ConversionRateTable(base: rateTable.base, rates: rates, date: rateTable.date)
         } else {
-            merged = rateTable
+            storage[baseCurrencyCode] = rateTable
         }
-        storage[baseCurrencyCode] = CacheEntry(rateTable: merged, storedAt: Date())
         writeToDisk()
     }
 
@@ -65,10 +52,10 @@ public actor LocalFileRateCache: RateCaching {
         try? data.write(to: fileURL, options: .atomic)
     }
 
-    private static func loadFromDisk(fileURL: URL) -> [String: CacheEntry] {
+    private static func loadFromDisk(fileURL: URL) -> [String: ConversionRateTable] {
         guard let data = try? Data(contentsOf: fileURL) else { return [:] }
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601
-        return (try? decoder.decode([String: CacheEntry].self, from: data)) ?? [:]
+        return (try? decoder.decode([String: ConversionRateTable].self, from: data)) ?? [:]
     }
 }

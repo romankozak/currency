@@ -2,24 +2,12 @@ import Foundation
 
 /// An in-memory rate cache backed by a dictionary.
 public actor InMemoryRateCache: RateCaching {
-    private struct CacheEntry: Sendable {
-        let rateTable: ConversionRateTable
-        let storedAt: Date
-    }
+    private var storage: [String: ConversionRateTable] = [:]
 
-    private var storage: [String: CacheEntry] = [:]
-    private let ttl: TimeInterval
-
-    public init(ttl: TimeInterval = 3600) {
-        self.ttl = ttl
-    }
+    public init() {}
 
     public func conversionTable(for baseCurrencyCode: String) -> ConversionRateTable? {
-        guard let entry = storage[baseCurrencyCode],
-              Date().timeIntervalSince(entry.storedAt) < ttl else {
-            return nil
-        }
-        return entry.rateTable
+        storage[baseCurrencyCode]
     }
 
     public func rate(from source: Currency, to target: Currency) -> Decimal? {
@@ -27,17 +15,15 @@ public actor InMemoryRateCache: RateCaching {
     }
 
     public func store(_ rateTable: ConversionRateTable, for baseCurrencyCode: String) {
-        let merged: ConversionRateTable
         if let existing = storage[baseCurrencyCode] {
-            var rates = existing.rateTable.rates
+            var rates = existing.rates
             for (key, value) in rateTable.rates {
                 rates[key] = value
             }
-            merged = ConversionRateTable(base: rateTable.base, rates: rates, date: rateTable.date)
+            storage[baseCurrencyCode] = ConversionRateTable(base: rateTable.base, rates: rates, date: rateTable.date)
         } else {
-            merged = rateTable
+            storage[baseCurrencyCode] = rateTable
         }
-        storage[baseCurrencyCode] = CacheEntry(rateTable: merged, storedAt: Date())
     }
 
     public func availableCurrencyCodes() -> [String] {

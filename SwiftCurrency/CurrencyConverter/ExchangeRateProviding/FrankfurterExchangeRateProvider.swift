@@ -76,7 +76,12 @@ public struct FrankfurterExchangeRateProvider: ExchangeRateProviding {
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyy-MM-dd"
         dateFormatter.timeZone = TimeZone(identifier: "UTC")
-        return dateFormatter.date(from: string) ?? Date()
+        guard let parsed = dateFormatter.date(from: string) else { return Date() }
+        let calendar = Calendar.current
+        let today = Date()
+        let p = calendar.dateComponents([.day, .month], from: parsed)
+        let t = calendar.dateComponents([.day, .month], from: today)
+        return (p.day == t.day && p.month == t.month) ? today : parsed
     }
 }
 

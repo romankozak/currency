@@ -2,15 +2,13 @@ import Foundation
 
 /// A cache for exchange rate data, keyed by base currency code.
 ///
-/// Implementations handle TTL expiration internally — protocol methods
-/// return `nil` for expired entries.
+/// The cache stores and returns data as-is, with no expiration logic.
+/// Callers are responsible for deciding whether cached data is fresh enough to use.
 public protocol RateCaching: Sendable {
-    /// Retrieves the cached `ConversionRateTable` for a base currency code,
-    /// or `nil` if missing or expired.
+    /// Retrieves the cached `ConversionRateTable` for a base currency code, or `nil` if absent.
     func conversionTable(for baseCurrencyCode: String) async -> ConversionRateTable?
 
-    /// Returns the exchange rate from `source` to `target` using cached data,
-    /// or `nil` if missing or expired.
+    /// Returns the exchange rate from `source` to `target` using cached data, or `nil` if absent.
     func rate(from source: Currency, to target: Currency) async -> Decimal?
 
     /// Stores or merges a `ConversionRateTable` into the cache for the given base currency code.

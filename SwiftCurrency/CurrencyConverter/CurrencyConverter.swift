@@ -10,28 +10,34 @@ import Foundation
 public actor CurrencyConverter {
     private let provider: ExchangeRateProviding
     private let rateCache: any RateCaching
+    private let cacheDuration: TimeInterval
 
     /// Creates a converter with an in-memory cache.
     /// - Parameters:
     ///   - provider: The exchange rate data source. Defaults to ``LocalExchangeRateProvider``.
-    ///   - cacheDuration: How long fetched rates are cached, in seconds. Defaults to 1 hour.
+    ///   - cacheDuration: How long fetched rates are considered fresh, in seconds. Defaults to 1 hour.
     public init(provider: ExchangeRateProviding = LocalExchangeRateProvider(), cacheDuration: TimeInterval = 3600) {
         self.provider = provider
-        self.rateCache = InMemoryRateCache(ttl: cacheDuration)
+        self.rateCache = InMemoryRateCache()
+        self.cacheDuration = cacheDuration
     }
 
     /// Creates a converter with an explicit cache implementation.
     /// - Parameters:
     ///   - provider: The exchange rate data source. Defaults to ``LocalExchangeRateProvider``.
     ///   - cache: The cache to use for storing fetched rates.
-    public init(provider: ExchangeRateProviding = LocalExchangeRateProvider(), cache: any RateCaching) {
+    ///   - cacheDuration: How long fetched rates are considered fresh, in seconds. Defaults to 1 hour.
+    public init(provider: ExchangeRateProviding = LocalExchangeRateProvider(), cache: any RateCaching, cacheDuration: TimeInterval = 3600) {
         self.provider = provider
         self.rateCache = cache
+        self.cacheDuration = cacheDuration
     }
 
     /// Returns the exchange rate from one currency to another.
     public func rate(from source: Currency, to target: Currency) async throws -> Decimal {
-        if let r = await rateCache.rate(from: source, to: target) {
+        if let table = await rateCache.conversionTable(for: source.code),
+           Date().timeIntervalSince(table.date) < cacheDuration,
+           let r = table.rate(for: target) {
             return r
         }
 
