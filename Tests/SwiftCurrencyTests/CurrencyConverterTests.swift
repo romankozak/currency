@@ -243,8 +243,7 @@ private struct EmptyPairProvider: ExchangeRateProviding {
     // Seed cache with EUR = 0.50 (a clearly fake rate)
     let cache = InMemoryRateCache()
     await cache.store(
-        ConversionRateTable(base: .usd, rates: ["EUR": Decimal(string: "0.50")!]),
-        for: "USD"
+        ConversionRateTable(base: .usd, rates: ["EUR": Decimal(string: "0.50")!])
     )
     // Provider returns a different rate (EUR = 0.92)
     let provider = MockProvider(rates: ["EUR": Decimal(string: "0.92")!])
@@ -259,8 +258,11 @@ private struct EmptyPairProvider: ExchangeRateProviding {
     // Seed cache with a rate whose date is older than the converter's cacheDuration
     let cache = InMemoryRateCache()
     await cache.store(
-        ConversionRateTable(base: .usd, rates: ["EUR": Decimal(string: "0.50")!], date: Date(timeIntervalSinceNow: -7200)),
-        for: "USD"
+        ConversionRateTable(
+            base: .usd,
+            rates: ["EUR": Decimal(string: "0.50")!],
+            date: Date(timeIntervalSinceNow: -7200)
+        )
     )
     // Provider returns a different rate
     let provider = MockProvider(rates: ["EUR": Decimal(string: "0.92")!])
@@ -275,8 +277,7 @@ private struct EmptyPairProvider: ExchangeRateProviding {
     // Seed cache with a fake rate
     let cache = InMemoryRateCache()
     await cache.store(
-        ConversionRateTable(base: .usd, rates: ["EUR": Decimal(string: "0.50")!]),
-        for: "USD"
+        ConversionRateTable(base: .usd, rates: ["EUR": Decimal(string: "0.50")!])
     )
     let provider = MockProvider(rates: ["EUR": Decimal(string: "0.92")!])
     let converter = CurrencyConverter(provider: provider, cache: cache)

@@ -39,7 +39,8 @@ public actor LocalFileRateCache: RateCaching {
         conversionTable(for: source.code)?.rate(for: target)
     }
 
-    public func store(_ rateTable: ConversionRateTable, for baseCurrencyCode: String) throws {
+    public func store(_ rateTable: ConversionRateTable) throws {
+        let baseCurrencyCode = rateTable.base.code
         if storage == nil { try loadFromDisk() }
         if let existing = storage?[baseCurrencyCode] {
             var rates = existing.rates

@@ -10,7 +10,7 @@ import Testing
 
     let cache = LocalFileRateCache(fileURL: url)
     let rateTable = ConversionRateTable(base: .usd, rates: ["EUR": Decimal(string: "0.92")!])
-    try await cache.store(rateTable, for: "USD")
+    try await cache.store(rateTable)
 
     let retrieved = await cache.conversionTable(for: "USD")
     #expect(retrieved != nil)
@@ -23,7 +23,7 @@ import Testing
 
     let cache1 = LocalFileRateCache(fileURL: url)
     let rateTable = ConversionRateTable(base: .usd, rates: ["EUR": Decimal(string: "0.92")!])
-    try await cache1.store(rateTable, for: "USD")
+    try await cache1.store(rateTable)
 
     // New instance reads from disk
     let cache2 = LocalFileRateCache(fileURL: url)
@@ -42,7 +42,7 @@ import Testing
         rates: ["EUR": Decimal(string: "0.92")!],
         date: Date(timeIntervalSinceNow: -86400)  // 1 day old
     )
-    try await cache.store(staleTable, for: "USD")
+    try await cache.store(staleTable)
     // Cache has no TTL — stale data is always returned
     #expect(await cache.conversionTable(for: "USD") != nil)
 }
@@ -52,8 +52,8 @@ import Testing
     defer { try? FileManager.default.removeItem(at: url) }
 
     let cache = LocalFileRateCache(fileURL: url)
-    try await cache.store(ConversionRateTable(base: .usd, rates: ["EUR": Decimal(string: "0.92")!]), for: "USD")
-    try await cache.store(ConversionRateTable(base: .usd, rates: ["GBP": Decimal(string: "0.79")!]), for: "USD")
+    try await cache.store(ConversionRateTable(base: .usd, rates: ["EUR": Decimal(string: "0.92")!]))
+    try await cache.store(ConversionRateTable(base: .usd, rates: ["GBP": Decimal(string: "0.79")!]))
 
     let retrieved = await cache.conversionTable(for: "USD")
     #expect(retrieved!.rate(for: .eur) == Decimal(string: "0.92")!)
@@ -65,7 +65,7 @@ import Testing
     defer { try? FileManager.default.removeItem(at: url) }
 
     let cache = LocalFileRateCache(fileURL: url)
-    try await cache.store(ConversionRateTable(base: .usd, rates: ["EUR": Decimal(string: "0.92")!]), for: "USD")
+    try await cache.store(ConversionRateTable(base: .usd, rates: ["EUR": Decimal(string: "0.92")!]))
     try await cache.clear()
     #expect(await cache.conversionTable(for: "USD") == nil)
 

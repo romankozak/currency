@@ -14,7 +14,8 @@ public actor InMemoryRateCache: RateCaching {
         conversionTable(for: source.code)?.rate(for: target)
     }
 
-    public func store(_ rateTable: ConversionRateTable, for baseCurrencyCode: String) {
+    public func store(_ rateTable: ConversionRateTable) {
+        let baseCurrencyCode = rateTable.base.code
         if let existing = storage[baseCurrencyCode] {
             var rates = existing.rates
             for (key, value) in rateTable.rates {
