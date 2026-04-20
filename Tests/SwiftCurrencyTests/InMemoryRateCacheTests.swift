@@ -62,13 +62,13 @@ import Testing
     await cache.store(rateTable, for: "USD")
     await cache.clear()
     #expect(await cache.conversionTable(for: "USD") == nil)
-    #expect(await cache.allBaseCurrencyCodes().isEmpty)
+    #expect(await cache.availableCurrencyCodes().isEmpty)
 }
 
 @Test func inMemoryAllBaseCurrencyCodes() async {
     let cache = InMemoryRateCache(ttl: 3600)
     await cache.store(ConversionRateTable(base: .usd, rates: ["EUR": Decimal(string: "0.92")!]), for: "USD")
     await cache.store(ConversionRateTable(base: .eur, rates: ["USD": Decimal(string: "1.09")!]), for: "EUR")
-    let codes = await Set(cache.allBaseCurrencyCodes())
+    let codes = await Set(cache.availableCurrencyCodes())
     #expect(codes == ["USD", "EUR"])
 }

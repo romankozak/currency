@@ -40,7 +40,7 @@ public actor InMemoryRateCache: RateCaching {
         storage[baseCurrencyCode] = CacheEntry(rateTable: merged, storedAt: Date())
     }
 
-    public func allBaseCurrencyCodes() -> [String] {
+    public func availableCurrencyCodes() -> [String] {
         Array(storage.keys)
     }
 

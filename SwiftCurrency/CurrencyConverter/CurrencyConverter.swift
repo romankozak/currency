@@ -57,7 +57,7 @@ public actor CurrencyConverter {
     /// - Throws: ``ExchangeRateError/refreshFailed(currencies:)`` if any currencies failed to fetch.
     ///           Successfully fetched currencies are still cached.
     public func refreshCache() async throws {
-        let currencies = await rateCache.allBaseCurrencyCodes().compactMap(Currency.find)
+        let currencies = await rateCache.availableCurrencyCodes().compactMap(Currency.find)
         try await fetchAndCache(currencies)
     }
 

@@ -55,7 +55,7 @@ import Testing
     let cache2 = LocalFileRateCache(fileURL: url, ttl: 0)
     #expect(await cache2.conversionTable(for: "USD") == nil)
     // But allBaseCurrencyCodes still returns it (expired entries are still stored)
-    #expect(await cache2.allBaseCurrencyCodes().contains("USD"))
+    #expect(await cache2.availableCurrencyCodes().contains("USD"))
 }
 
 @Test func diskMergesOnStore() async throws {
@@ -89,7 +89,7 @@ import Testing
     let url = FileManager.default.temporaryDirectory.appendingPathComponent("nonexistent_\(UUID()).json")
     let cache = LocalFileRateCache(fileURL: url, ttl: 3600)
     #expect(await cache.conversionTable(for: "USD") == nil)
-    #expect(await cache.allBaseCurrencyCodes().isEmpty)
+    #expect(await cache.availableCurrencyCodes().isEmpty)
 }
 
 @Test func diskHandlesCorruptFile() async throws {
@@ -99,5 +99,5 @@ import Testing
     try "not valid json".data(using: .utf8)!.write(to: url)
     let cache = LocalFileRateCache(fileURL: url, ttl: 3600)
     #expect(await cache.conversionTable(for: "USD") == nil)
-    #expect(await cache.allBaseCurrencyCodes().isEmpty)
+    #expect(await cache.availableCurrencyCodes().isEmpty)
 }

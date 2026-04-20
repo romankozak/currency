@@ -47,7 +47,7 @@ public actor LocalFileRateCache: RateCaching {
         writeToDisk()
     }
 
-    public func allBaseCurrencyCodes() -> [String] {
+    public func availableCurrencyCodes() -> [String] {
         Array(storage.keys)
     }
 

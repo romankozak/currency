@@ -20,7 +20,7 @@ public protocol RateCaching: Sendable {
     func store(_ rateTable: ConversionRateTable, for baseCurrencyCode: String) async
 
     /// Returns all base currency codes currently held in the cache (expired or not).
-    func allBaseCurrencyCodes() async -> [String]
+    func availableCurrencyCodes() async -> [String]
 
     /// Removes all cached entries.
     func clear() async
