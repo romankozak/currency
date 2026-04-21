@@ -22,6 +22,11 @@ import Testing
     #expect(custom.minorUnits == 5)
 }
 
+@Test func currencyNormalizesCode() {
+    #expect(Currency(code: "usd", symbol: "$").code == "USD")
+    #expect(Currency(code: " usd ", symbol: "$") == .usd)
+}
+
 @Test func currencyEquality() {
     #expect(Currency.eur == Currency.eur)
     #expect(Currency.usd != Currency.gbp)

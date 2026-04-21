@@ -17,7 +17,7 @@ public struct Currency: Sendable, Codable {
     public let minorUnits: Int
 
     public init(code: String, symbol: String, minorUnits: Int = 2) {
-        self.code = code
+        self.code = code.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
         self.symbol = symbol
         self.minorUnits = minorUnits
     }

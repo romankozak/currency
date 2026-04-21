@@ -23,7 +23,7 @@ public actor CurrencyConverter {
     }
 
     /// Creates a converter with an explicit cache implementation.
-    /// - Parameters:
+    /// - Parameters:   
     ///   - provider: The exchange rate data source. Defaults to ``LocalExchangeRateProvider``.
     ///   - cache: The cache to use for storing fetched rates.
     ///   - cacheDuration: How long fetched rates are considered fresh, in seconds. Defaults to 1 hour.
