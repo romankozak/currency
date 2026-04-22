@@ -12,7 +12,7 @@ A small Swift package for working with ISO 4217 currencies and converting amount
 
 ## Requirements
 
-- Swift 6.0+
+- Swift 5.9+
 - iOS 15+, macOS 12+, tvOS 15+, watchOS 8+
 
 ## Installation
