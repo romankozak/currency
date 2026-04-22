@@ -3,7 +3,7 @@ import Foundation
 /// A convenience wrapper around an ``ExchangeRateProvider`` with built-in caching.
 ///
 /// ```swift
-/// let converter = CurrencyConverter()  // uses local stubbed data
+/// let converter = CurrencyConverter()  // uses FrankfurterExchangeRateProvider
 /// let rate = try await converter.rate(from: .usd, to: .eur)
 /// let amount = try await converter.convert(100, from: .usd, to: .gbp)
 /// ```
@@ -14,9 +14,9 @@ public actor CurrencyConverter {
 
     /// Creates a converter with an in-memory cache.
     /// - Parameters:
-    ///   - provider: The exchange rate data source. Defaults to ``LocalExchangeRateProvider``.
+    ///   - provider: The exchange rate data source. Defaults to ``FrankfurterExchangeRateProvider``.
     ///   - cacheDuration: How long fetched rates are considered fresh, in seconds. Defaults to 1 hour.
-    public init(provider: ExchangeRateProviding = LocalExchangeRateProvider(), cacheDuration: TimeInterval = 3600) {
+    public init(provider: ExchangeRateProviding = FrankfurterExchangeRateProvider(), cacheDuration: TimeInterval = 3600) {
         self.provider = provider
         self.rateCache = InMemoryRateCache()
         self.cacheDuration = cacheDuration
@@ -24,10 +24,10 @@ public actor CurrencyConverter {
 
     /// Creates a converter with an explicit cache implementation.
     /// - Parameters:   
-    ///   - provider: The exchange rate data source. Defaults to ``LocalExchangeRateProvider``.
+    ///   - provider: The exchange rate data source. Defaults to ``FrankfurterExchangeRateProvider``.
     ///   - cache: The cache to use for storing fetched rates.
     ///   - cacheDuration: How long fetched rates are considered fresh, in seconds. Defaults to 1 hour.
-    public init(provider: ExchangeRateProviding = LocalExchangeRateProvider(), cache: any RateCaching, cacheDuration: TimeInterval = 3600) {
+    public init(provider: ExchangeRateProviding = FrankfurterExchangeRateProvider(), cache: any RateCaching, cacheDuration: TimeInterval = 3600) {
         self.provider = provider
         self.rateCache = cache
         self.cacheDuration = cacheDuration

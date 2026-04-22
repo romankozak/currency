@@ -8,7 +8,7 @@ A small Swift package for working with ISO 4217 currencies and converting amount
 - Static currency shortcuts such as `.usd`, `.eur`, and `.gbp`.
 - Async `CurrencyConverter` for rates and amount conversion.
 - Built-in in-memory and local JSON file rate caches.
-- Exchange-rate providers for local stub data, Frankfurter, and ExchangeRate-API.
+- Live rates by default via Frankfurter, with local stub and ExchangeRate-API providers available.
 
 ## Requirements
 
@@ -42,10 +42,10 @@ let rate = try await converter.rate(from: .usd, to: .eur)
 let amount = try await converter.convert(100, from: .usd, to: .gbp)
 ```
 
-Use live rates:
+Use local stub rates for tests, previews, or offline work:
 
 ```swift
-let provider = FrankfurterExchangeRateProvider()
+let provider = LocalExchangeRateProvider()
 let converter = CurrencyConverter(provider: provider)
 let eur = try await converter.convert(100, from: .usd, to: .eur)
 ```
@@ -55,7 +55,7 @@ Use a persistent cache:
 ```swift
 let cacheURL = URL(filePath: "/tmp/swift-currency-rates.json")
 let cache = LocalFileRateCache(fileURL: cacheURL)
-let converter = CurrencyConverter(provider: FrankfurterExchangeRateProvider(), cache: cache)
+let converter = CurrencyConverter(cache: cache)
 ```
 
 ## Testing
